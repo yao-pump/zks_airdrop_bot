@@ -1,0 +1,6 @@
+{
+  "bsc": "https://bsc-dataseed.binance.org/",
+  "eth_mainnet": "https://eth.llamarpc.com",
+  "eth_testnet": "https://old-quaint-log.ethereum-goerli.discover.quiknode.pro/37d1bcf051085e702310384287d44471e64606a9/",
+  "zks_era": "https://mainnet.era.zksync.io"
+}
