@@ -34,18 +34,19 @@ def load_wallet(w3):
 
 
 def check_balance(w3, address):
-    if not w3.isChecksumAddress(address):
+    if not w3.is_address(address):
         print("Invalid Ethereum address")
         return
 
     balance = w3.eth.get_balance(address)
-    eth_balance = w3.fromWei(balance, "ether")
+    eth_balance = w3.from_wei(balance, "ether")
     print(f'Balance for {address}: {eth_balance} ETH')
 
 
 def transfer_eth(w3, account, to, amount, nonce=None):
     if nonce is None:
-        nonce = w3.eth.get_transaction_count(w3.to_checksum_address(account['address']))
+        nonce = w3.eth.get_transaction_count(
+            w3.to_checksum_address(account['address']))
     gas_price = w3.eth.gas_price
     transaction = {
         'nonce': nonce,
@@ -55,7 +56,8 @@ def transfer_eth(w3, account, to, amount, nonce=None):
         'value': w3.to_wei(amount, 'ether'),
         'chainId': 1,
     }
-    signed_txn = w3.eth.account.sign_transaction(transaction, account['private_key'])
+    signed_txn = w3.eth.account.sign_transaction(
+        transaction, account['private_key'])
     transaction_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
     print(f'Transaction sent! TX hash: {transaction_hash.hex()}')
 
