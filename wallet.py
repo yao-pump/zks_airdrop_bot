@@ -3,26 +3,29 @@ import json
 from getpass import getpass
 from web3 import Web3, HTTPProvider
 from utils import get_providers, get_accounts
-from eth_account import Account
+# from eth_account import Account
+import eth_account
 import secrets
-
+from database import insert_new_account, connect_mongodb
 
 def create_wallet():
     priv = secrets.token_hex(32)
     private_key = "0x" + priv
-    print("SAVE BUT DO NOT SHARE THIS:", private_key)
-    acct = Account.from_key(private_key)
+    # print("SAVE BUT DO NOT SHARE THIS:", private_key)
+    acct = eth_account.Account.from_key(private_key)
     print("Address:", acct.address)
-    account = {acct.address: private_key}
+    account = {'address': acct.address, 'private_key': private_key}
     # password = getpass('Enter a password to protect your wallet: ')
     # encrypted_key = w3.eth.account.encrypt(private_key, password)
-    with open('config/wallet.json', 'r+') as f:
-        accounts_json = json.load(f)
-        # with open('config/wallet.json', 'w') as f:
-        accounts_json[acct.address] = private_key
-        f.seek(0)
-        json.dump(accounts_json, f)
-    print('Wallet created and saved to wallet.json')
+    # with open('config/wallet.json', 'r+') as f:
+    #     accounts_json = json.load(f)
+    #     # with open('config/wallet.json', 'w') as f:
+    #     accounts_json[acct.address] = private_key
+    #     f.seek(0)
+    #     json.dump(accounts_json, f)
+    # print('Wallet created and saved to wallet.json')
+    return account
+
 
 
 def load_wallet(w3):
@@ -61,16 +64,20 @@ def transfer_eth(w3, account, to, amount, nonce=None):
 
 
 if __name__ == "__main__":
+    db = connect_mongodb()
+    wallet = create_wallet()
+    print(wallet)
+    insert_new_account(db, wallet)
     # Connect to a local Ethereum node or an external provider like Infura
-    providers = get_providers()
-    # provider_url = providers['eth_goerli']
-    provider_url = providers['zks_era']
-    w3 = Web3(HTTPProvider(provider_url))
+    # providers = get_providers()
+    # # provider_url = providers['eth_goerli']
+    # provider_url = providers['zks_era']
+    # w3 = Web3(HTTPProvider(provider_url))
 
-    accounts = get_accounts()
-    acc = accounts[0]
-    # transfer_eth(w3, acc, acc, 0, nonce=0)
-    check_balance(w3, acc['address'])
+    # accounts = get_accounts()
+    # acc = accounts[0]
+    # # transfer_eth(w3, acc, acc, 0, nonce=0)
+    # check_balance(w3, acc['address'])
     # create_wallet()
     # for address in accounts.keys():
     #     print(check_balance(address))

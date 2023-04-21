@@ -1,5 +1,15 @@
 import json
+import secrets
+from eth_account import Account
+from cfg import rpcs, chains
 
+
+def get_contract_address(token, network):
+    pass
+
+def get_gas_price(network='eth_mainnet'):
+    gas_price = rpcs[network].eth.gas_price
+    return gas_price
 
 def analyze_tx_data(tx_data):
     function = tx_data[:10]

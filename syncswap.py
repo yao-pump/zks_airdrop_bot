@@ -106,49 +106,7 @@ async def main():
     # pool = 
     pool_address = get_pool_address('eth', 'usdc')
     print(pool_address)
-    # get_balance(UDSC_ADDRESS, pool_address)
-    # swap('eth', 'usdc', 0.1)
-    # pool_address = w3_zks.to_checksum_address(pool_address)
-    # print(pool_address)
-    # pool_contract = w3_zks.eth.contract(address=pool_address, abi=pool_abi)
-    # # reserve_usdc, reserve_eth = pool_contract.functions.getReserves().call()
-    # # print(reserve_usdc, reserve_eth)
-    #
-    # amount = 0.01
-    # value = w3_zks.to_wei(amount, 'ether')
-    # print(value)
-    # withdraw_mode = 1
-    # swap_data = encode(
-    #     ["address", "address", "uint8"],
-    #     [WETH_ADDERSS, w3_zks.to_checksum_address(acc['address']), withdraw_mode])
-    #
-    # print(swap_data)
-    #
-    # steps = [(
-    #     pool_address, swap_data, ETH_ADDRESS, b'0x',
-    # )]
-    #
-    # paths = [(steps, ETH_ADDRESS, value)]
-    #
-    # current_time = int(time.time())
-    # big_number = current_time + 1800
-    # # tx = router_contract.functions.swap(paths, 0, big_number).call()
-    # tx = router_contract.functions.swap(paths, 0, big_number).build_transaction({'chainId': 324,
-    #                'gas': 4000000, 'gasPrice': w3_zks.eth.gas_price, 'from': acc['address'], 'value': value,
-    #                'nonce': w3_zks.eth.get_transaction_count(acc['address'])})
-    # tx['data'] = tx['data'][:-64]
-    # p1 = tx['data'][:64+10]
-    # p2 = '00000000000000000000000000000000000000000000000000000000010f4605'
-    # p3 = tx['data'][128+10:-128]
-    # p4 = '00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000'
-    # tx['data'] = p1 + p2 + p3 + p4
-    # # tx['data'] = '0x2cc4081e000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000010f691e00000000000000000000000000000000000000000000000000000000642aff410000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002386f26fc100000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000080115c708e12edd42e504c1cd52aea96c547c05c00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000600000000000000000000000005aea5775959fbc2557cc8789bc1bf90a239d9a91000000000000000000000000dc8d45d062e2fa5cd76b17d24f8691c950d0de5800000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000'
-    # print(tx)
-    #
-    # signed_txn = w3_zks.eth.account.sign_transaction(tx, acc['private_key'])
-    # print(signed_txn.rawTransaction)
-    # transaction_hash = w3_zks.eth.send_raw_transaction(signed_txn.rawTransaction)
-    # print(f"Transaction hash: {transaction_hash.hex()}")
+
 
 if __name__ == '__main__':
     asyncio.run(main())
