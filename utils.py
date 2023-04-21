@@ -13,14 +13,17 @@ def analyze_tx_data(tx_data):
         data.append(parameters[i*64:(i+1)*64])
     return data
 
+
 def load_json(filename):
     with open(filename, 'r') as f:
         json_file = json.load(f)
     return json_file
 
+
 def get_providers():
     providers = load_json('config/providers.json')
     return providers
+
 
 def get_accounts():
     accounts_dict = load_json('config/wallet.json')
@@ -28,6 +31,33 @@ def get_accounts():
     for key, value in accounts_dict.items():
         accounts.append({"address": key, "private_key": value})
     return accounts
+
+
+def get_ABI_functions(path):
+    with open(path, encoding='utf-8', errors='ignore') as json_data:
+        contract_abi = json.load(json_data, strict=False)
+
+    function_parameters = {}
+
+    for item in contract_abi:
+        if item['type'] == 'function':
+            function_name = item['name']
+            parameters = []
+
+            for param in item['inputs']:
+                param_info = {
+                    'name': param['name'],
+                    'type': param['type']
+                }
+                parameters.append(param_info)
+
+            function_parameters[function_name] = parameters
+
+    print("Functions:")
+    for function_name, parameters in function_parameters.items():
+        print(f"{function_name}:")
+        for param in parameters:
+            print(f"  {param['name']} ({param['type']})")
 
 
 if __name__ == '__main__':
@@ -43,3 +73,6 @@ if __name__ == '__main__':
     # for i in range(len(a)):
     #     if a[i] != b[i]:
     #         print(i, a[i], b[i])
+    # print(get_accounts())
+    get_ABI_functions("config/syncswap_pool_factory_abi.json")
+    # get_ABI_functions("config/zks_abi.json")
