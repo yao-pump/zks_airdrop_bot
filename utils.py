@@ -1,7 +1,5 @@
 import json
-import secrets
-from eth_account import Account
-from cfg import rpcs, chains
+from cfg import rpcs
 
 
 def get_contract_address(token, network):
@@ -30,9 +28,7 @@ def load_json(filename):
     return json_file
 
 
-def get_providers():
-    providers = load_json('config/providers.json')
-    return providers
+
 
 
 def get_accounts():
