@@ -9,6 +9,7 @@ from eth_abi import encode
 
 providers = get_providers()
 provider_url = providers['zks_era']
+# provider_url = providers['zks_testnet']
 w3_zks = Web3(HTTPProvider(provider_url))
 
 accounts = get_accounts()
@@ -33,9 +34,9 @@ with open("config/muteswap_router_abi.json", encoding='utf-8', errors='ignore') 
 
 # contract addresses
 ROUTER_ADDRESS = w3_zks.to_checksum_address(
-    "0x96c2Cf9edbEA24ce659EfBC9a6e3942b7895b5e8")
+    "0x8B791913eB07C32779a16750e3868aA8495F5964")
 FACTORY_ADDRESS = w3_zks.to_checksum_address(
-    "0xCc05E242b4A82f813a895111bCa072c8BBbA4a0e")
+    "0x40be1cBa6C5B47cDF9da7f963B6F761F4C60627D")
 PAIR_ADDRESS = w3_zks.to_checksum_address(
     "0x0f6d5b6c5c6b5f0e5c7f8b0d0c7e9e6f5d7c0a6f")
 
@@ -47,22 +48,25 @@ pair_contract = w3_zks.eth.contract(address=ROUTER_ADDRESS, abi=pair_abi)
 
 
 # swap tokens using router contract
-def swap_tokens(amount_in, amount_out_min, path, to, deadline):
+def swap_tokens(amount_out_min, path, to, deadline):
 
-    swap_function = router_contract.functions.swapExactTokensForTokens(
-        amount_in, amount_out_min, path, to, deadline, [True]*len(path))
+    swap_function = router_contract.functions.swapExactETHForTokensSupportingFeeOnTransferTokens(
+        amount_out_min, path, to, deadline, [False, False])
     tx = swap_function.build_transaction({
         'from': acc['address'],
         # 'to': ROUTER_ADDRESS,
-        'gas': 4000000,
+        'gas': 15000000,
         'gasPrice': w3_zks.eth.gas_price,
         'nonce': w3_zks.eth.get_transaction_count(acc['address']),
         # 'value': 0,
+        # testnet chainId
+        # 'chainId': 280,
+        # mainnet chainId
         'chainId': 324,
     })
 
-    tx['data'] = tx['data'][:64*9+10-1] + '0'
     print(tx)
+
     # Sign the transaction
     signed_tx = w3_zks.eth.account.sign_transaction(tx, acc['private_key'])
 
@@ -78,13 +82,13 @@ def swap_tokens(amount_in, amount_out_min, path, to, deadline):
 
 if __name__ == "__main__":
 
-    amount_in = w3_zks.to_wei(Decimal('0.001'), 'ether')
-    amount_out_min = w3_zks.to_wei(Decimal('0.0001'), 'ether')
+    # amount_out_min = w3_zks.to_wei(Decimal('1.9'), 'usdc')
+    amount_out_min = 1900616
     path = [w3_zks.to_checksum_address(
-        ETH_ADDRESS), w3_zks.to_checksum_address(UDSC_ADDRESS)]
+        WETH_ADDERSS), w3_zks.to_checksum_address(UDSC_ADDRESS)]
     to = w3_zks.to_checksum_address(acc['address'])
     deadline = int(time.time()) + 60*60
-    swap_tokens(amount_in, amount_out_min, path, to, deadline)
+    swap_tokens(amount_out_min, path, to, deadline)
 
     # balance = w3_zks.eth.get_balance(acc['address'])
     # print(f"Balance: {w3_zks.from_wei(balance, 'ether')} ETH")
