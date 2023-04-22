@@ -13,7 +13,7 @@ provider_url = providers['zks_era_{}'.format(network)]
 w3_zks = Web3(HTTPProvider(provider_url))
 
 accounts = get_accounts()
-acc = accounts[-1]
+acc = accounts[0]
 
 if network == 'testnet':
     chain_id = 280
@@ -47,6 +47,9 @@ with open("config/muteswap_factory_abi.json", encoding='utf-8', errors='ignore')
 with open("config/muteswap_router_abi.json", encoding='utf-8', errors='ignore') as json_data:
     router_abi = json.load(json_data, strict=False)
 
+with open("config/erc20_abi.json", encoding='utf-8', errors='ignore') as json_data:
+    erc20_abi = json.load(json_data, strict=False)
+
 # contract addresses
 if network == 'testnet':
     ROUTER_ADDRESS = w3_zks.to_checksum_address(
@@ -71,9 +74,11 @@ factory_contract = w3_zks.eth.contract(
 
 
 def get_pair_address(token1=WETH_ADDRESS, token2=USDC_ADDRESS):
-    pool_address = factory_contract.functions.getPair(token1, token2, False).call()
+    pool_address = factory_contract.functions.getPair(
+        token1, token2, False).call()
     pool_address = w3_zks.to_checksum_address(pool_address)
     return pool_address
+
 
 def get_amount_out(pair_address, token, amount_in):
     pair_contract = w3_zks.eth.contract(address=pair_address, abi=pair_abi)
@@ -81,36 +86,116 @@ def get_amount_out(pair_address, token, amount_in):
         amount_in = w3_zks.to_wei(amount_in, 'ether')
     else:
         amount_in = int(Decimal(amount_in * 10 ** 6))
-    amount_out = pair_contract.functions.current(ADDRESS[token], amount_in).call()
+    amount_out = pair_contract.functions.current(
+        ADDRESS[token], amount_in).call()
     return amount_out
 
 
 def swap_tokens(token_from='eth', token_to='usdc', amount=0.001, slippage=0.05):
+    token_from_address = ADDRESS[token_from]
+    token_to_address = ADDRESS[token_to]
+
     if token_from == 'eth':
         value = w3_zks.to_wei(amount, 'ether')
     else:
-        # todo: swap other tokens to eth
-        value = amount * 10 ** 6
+        value = int(Decimal(amount * 10 ** 6))
 
-    swap_pair_address = get_pair_address(ADDRESS[token_from], ADDRESS[token_to])
+    swap_pair_address = get_pair_address(token_from_address, token_to_address)
     amount_out = get_amount_out(swap_pair_address, token_from, amount)
-    amount_out_min = int(Decimal(amount_out * (1-slippage)))
+    amount_out_min = int(Decimal(amount_out * (1 - slippage)))
 
-    path = [w3_zks.to_checksum_address(ADDRESS[token_from]),
-            w3_zks.to_checksum_address(ADDRESS[token_to])]
+    path = [w3_zks.to_checksum_address(token_from_address),
+            w3_zks.to_checksum_address(token_to_address)]
 
     to = w3_zks.to_checksum_address(acc['address'])
     deadline = int(time.time()) + 60 * 60
 
-    swap_function = router_contract.functions.swapExactETHForTokensSupportingFeeOnTransferTokens(
-        amount_out_min, path, to, deadline, [False, False])
+    if token_from == 'eth':
+        swap_function = router_contract.functions.swapExactETHForTokensSupportingFeeOnTransferTokens(
+            amount_out_min, path, to, deadline, [False, False])
+    else:
+        # Approve router contract to spend the tokens on behalf of the user
+        token_contract = w3_zks.eth.contract(
+            address=token_from_address, abi=pair_abi)
+        approve_function = token_contract.functions.approve(
+            ROUTER_ADDRESS, value)
+        approve_tx = approve_function.build_transaction({
+            'from': acc['address'],
+            'gas': 15000000,
+            'gasPrice': w3_zks.eth.gas_price,
+            'nonce': w3_zks.eth.get_transaction_count(acc['address']),
+            'chainId': chain_id,
+        })
+        signed_approve_tx = w3_zks.eth.account.sign_transaction(
+            approve_tx, acc['private_key'])
+        w3_zks.eth.send_raw_transaction(signed_approve_tx.rawTransaction)
+
+        swap_function = router_contract.functions.swapExactTokensForETHSupportingFeeOnTransferTokens(
+            value, amount_out_min, path, to, deadline, [False, False])
+
     tx = swap_function.build_transaction({
         'from': acc['address'],
-        # 'to': ROUTER_ADDRESS,
         'gas': 15000000,
         'gasPrice': w3_zks.eth.gas_price,
         'nonce': w3_zks.eth.get_transaction_count(acc['address']),
-        'value': value,
+        'value': 0 if token_from != 'eth' else value,
+        'chainId': chain_id,
+    })
+
+    print(tx)
+
+    # Sign the transaction
+    signed_tx = w3_zks.eth.account.sign_transaction(tx, acc['private_key'])
+
+    # Send the signed transaction
+    tx_hash = w3_zks.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+    # Wait for the transaction to be mined and get the transaction receipt
+    tx_receipt = w3_zks.eth.wait_for_transaction_receipt(tx_hash)
+
+    print(f"Transaction hash: {tx_hash.hex()}")
+    print(f"Transaction receipt: {tx_receipt}")
+
+
+def add_liquidity(token1='eth', token2='usdc', amount1_desired=0.01, amount2_desired=5, amount1_min=0.009, amount2_min=4, deadline=None):
+    token1_address = ADDRESS[token1]
+    token2_address = ADDRESS[token2]
+
+    if token1 == 'eth':
+        amount1_desired_wei = w3_zks.to_wei(amount1_desired, 'ether')
+    else:
+        amount1_desired_wei = int(Decimal(amount1_desired * 10**6))
+
+    if token2 == 'eth':
+        amount2_desired_wei = w3_zks.to_wei(amount2_desired, 'ether')
+    else:
+        amount2_desired_wei = int(Decimal(amount2_desired * 10**6))
+
+    amount1_min_wei = w3_zks.to_wei(amount1_min, 'ether')
+    amount2_min_wei = int(Decimal(amount2_min * 10**6))
+
+    to = w3_zks.to_checksum_address(acc['address'])
+
+    if deadline is None:
+        deadline = int(time.time()) + 60 * 60  # Deadline: 1 hour from now
+
+    add_liquidity_function = router_contract.functions.addLiquidity(
+        token1_address,
+        token2_address,
+        amount1_desired_wei,
+        amount2_desired_wei,
+        amount1_min_wei,
+        amount2_min_wei,
+        to,
+        deadline,
+        [False, False]
+    )
+
+    tx = add_liquidity_function.build_transaction({
+        'from': acc['address'],
+        'gas': 15000000,
+        'gasPrice': w3_zks.eth.gas_price,
+        'nonce': w3_zks.eth.get_transaction_count(acc['address']),
         'chainId': chain_id,
     })
 
@@ -130,5 +215,7 @@ def swap_tokens(token_from='eth', token_to='usdc', amount=0.001, slippage=0.05):
 
 
 if __name__ == "__main__":
-    swap_tokens(amount=0.001)
+    # swap_tokens(amount=0.001)
+    swap_tokens(token_from='usdc', token_to='eth', amount=2, slippage=0.05)
 
+    print()
