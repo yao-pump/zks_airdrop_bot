@@ -2,16 +2,17 @@ import json
 
 from web3 import Web3, HTTPProvider
 
-from utils import get_accounts, get_providers
+from utils import get_accounts
+from cfg import  providers
 
 CHAIN_IDS = {
     'mainnet': 1,
     'testnet': 5,
 }
-network = 'mainnet'
-acc = get_accounts()[1]
+network = 'testnet'
+acc = get_accounts()[-1]
 # account = Account.from_key(acc["private_key"])
-provider_url = get_providers()['eth_{}'.format(network)]
+provider_url = providers['eth_{}'.format(network)]
 web3 = Web3(HTTPProvider(endpoint_uri=provider_url))
 
 def get_bridge_abi(network='testnet'):
@@ -48,6 +49,6 @@ def bridge_eth(web3, abi_info, account, amount=0.005):
 
 
 abi_info = get_bridge_abi(network)
-bridge_eth(web3, abi_info, account=acc, amount=0.69)
+bridge_eth(web3, abi_info, account=acc, amount=0.04)
 
 # account = get

@@ -3,12 +3,12 @@ import time
 from decimal import Decimal
 
 from web3 import Web3, HTTPProvider
-from utils import get_accounts, get_providers
+from utils import get_accounts
 import asyncio
 from eth_abi import encode
+from cfg import providers
 
-providers = get_providers()
-provider_url = providers['zks_era']
+provider_url = providers['zks_era_mainnet']
 w3_zks = Web3(HTTPProvider(provider_url))
 
 accounts = get_accounts()
@@ -40,7 +40,11 @@ pool_factory_contract = w3_zks.eth.contract(address=POOL_FACTORY_ADDRESS, abi=po
 router_contract = w3_zks.eth.contract(address=ROUTER_ADDRESS, abi=router_abi)
 
 
-def get_balance(token, pool_address):
+
+# def approve(pool_address, amount):
+#     pool_contract = w3_zks.eth.contract(address=pool_address, abi=pool_abi)
+
+def get_balance_in_pool(token, pool_address):
     pool_contract = w3_zks.eth.contract(address=pool_address, abi=pool_abi)
     balance = pool_contract.functions.balanceOf(w3_zks.to_checksum_address(token)).call()
     print(balance)
@@ -106,6 +110,7 @@ async def main():
     # pool = 
     pool_address = get_pool_address('eth', 'usdc')
     print(pool_address)
+    get_balance_in_pool(ADDRESS['usdc'], pool_address)
 
 
 if __name__ == '__main__':
