@@ -66,6 +66,10 @@ def get_all_accounts(client, database='web3', collection='accounts'):
     documents = list(coll.find())
     return documents
 
+def get_account(client, index=0, database='web3', collection='accounts'):
+    accounts = get_all_accounts(client, database, collection)
+    return accounts[index]
+
 def get_random_account(client, database='web3', collection='accounts'):
     """
     Get a random document from a MongoDB collection.

@@ -1,5 +1,6 @@
-from cfg import rpcs, chains
+from cfg import rpcs, chains, zks_token_addresses, token_abi
 from utils import get_gas_price, get_contract_address
+from decimal import Decimal
 
 class Account:
     def __init__(self, account_info) -> None:
@@ -9,22 +10,31 @@ class Account:
 
     def get_eth_balance(self, network='eth_mainnet'):
         balance = rpcs[network].eth.get_balance(self.address)
-        eth_balance = rpcs[network].fromWei(balance, "ether")
+        eth_balance = rpcs[network].from_wei(balance, "ether")
         print('Balance for {} on {}: {} ETH'.format(self.address, network, eth_balance))
         return eth_balance
 
-    def get_balance(self, token, network):
-        # Connect to the Ethereum provider
 
-        contract_address = get_contract_address(token, network)
-        contract_address = rpcs[network].toChecksumAddress(contract_address)
+    def get_lp_balance(self, pool_address, network):
+        contract = rpcs[network].eth.contract(address=pool_address, abi=token_abi)
+        balance = contract.functions.balanceOf(self.address).call()
+        # balance = Decimal(balance) / Decimal(10 ** 6)
+        return balance
+
+    def get_balance(self, token, network_symbol='eth', network_type='testnet'):
+        # Connect to the Ethereum provider
+        network = network_symbol + '_' + network_type
+        if network_symbol == 'zks_era':
+            contract_address = zks_token_addresses[network_type][token]
+
+        contract_address = rpcs[network].to_checksum_address(contract_address)
 
         # Create a contract object
-        contract = rpcs[network].eth.contract(address=contract_address, abi=abi)
+        contract = rpcs[network].eth.contract(address=contract_address, abi=token_abi)
 
         # Get the token balance
         balance = contract.functions.balanceOf(self.address).call()
-
+        balance = Decimal(balance) / Decimal(10 ** 6)
         return balance
 
 
@@ -42,10 +52,11 @@ class Account:
             'nonce': nonce,
             'gasPrice': gas_price,
             'gas': 21000,
-            'to': rpcs[network].to_checksum_address(to['address']),
-            'value': rpcs[network].to_wei(amount, 'ether'),
+            'to': rpcs[network].to_checksum_address(to.address),
+            'value': rpcs[network].to_wei(amount+0.0005, 'ether'),
             'chainId': chains[network],
         }
         signed_txn = rpcs[network].eth.account.sign_transaction(transaction, self.private_key)
         transaction_hash = rpcs[network].eth.send_raw_transaction(signed_txn.rawTransaction)
         print(f'Transaction sent! TX hash: {transaction_hash.hex()}')
+

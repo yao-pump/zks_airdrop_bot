@@ -7,9 +7,7 @@ from utils import get_accounts
 from cfg import providers
 
 network = 'testnet'
-# providers = get_providers()
 provider_url = providers['zks_era_{}'.format(network)]
-# provider_url = providers['zks_era_testnet']
 w3_zks = Web3(HTTPProvider(provider_url))
 
 accounts = get_accounts()
