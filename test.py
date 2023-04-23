@@ -15,15 +15,17 @@ def test_account():
 
 def test_pool():
     db = connect_mongodb()
-    acc_info = get_account(db, 2)
+    acc_info = get_account(db, 4)
     acc = Account(acc_info)
-    syncswap = SyncSwap(network='testnet')
-    pool_address = syncswap.get_pool_address('usdt', 'eth')
+    syncswap = SyncSwap(network='mainnet')
+    pool_address = syncswap.get_pool_address('usdc', 'eth')
     print(pool_address)
     pool_contract = syncswap.rpc.eth.contract(address=pool_address, abi=syncswap.pool_abi)
-    lp_balance = acc.get_lp_balance(pool_address, 'zks_era_' + syncswap.network)
-    print(lp_balance)
-    print(syncswap.calculate_receive_eth(pool_contract, lp_balance))
+    print(pool_contract.functions.balanceOf(acc.address).call())
+    print(pool_contract.functions.totalSupply().call())
+    # lp_balance = acc.get_lp_balance(pool_address, 'zks_era_' + syncswap.network)
+    # print(lp_balance)
+    # print(syncswap.calculate_receive_eth(pool_contract, lp_balance))
 
 def test_swap():
     db = connect_mongodb()
@@ -35,17 +37,17 @@ def test_swap():
 
 def test_add_liquidity():
     db = connect_mongodb()
-    acc_info = get_account(db, 3)
+    acc_info = get_account(db, 4)
     acc = Account(acc_info)
-    syncswap = SyncSwap(network='testnet')
-    usdt_amount = (acc.get_balance('usdc', 'zks_era', 'testnet'))
-    syncswap.add_liquidity(acc, 'eth', 'usdc', 0.001, usdt_amount)
+    syncswap = SyncSwap(network='mainnet')
+    usdt_amount = (acc.get_balance('usdc', 'zks_era', 'mainnet'))
+    syncswap.add_liquidity(acc, 'eth', 'usdc', 0.1, usdt_amount)
 
 def test_remove_liquidity():
     db = connect_mongodb()
-    acc_info = get_account(db, 3)
+    acc_info = get_account(db, 4)
     acc = Account(acc_info)
-    syncswap = SyncSwap(network='testnet')
+    syncswap = SyncSwap(network='mainnet')
     syncswap.remove_liquidity(acc, 'eth', 'usdc')
 
 def test_approve():

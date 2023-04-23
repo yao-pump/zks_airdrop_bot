@@ -183,15 +183,15 @@ class SyncSwap(DEX):
         print(tx)
         success = execute_tx(tx, account, self.rpc)
 
-    def remove_liquidity(self, account, token_1, token_2, slippage=0.1):
+    def remove_liquidity(self, account, token_1, token_2, slippage=0.005):
         # approve LP token
-        pool_address = self.get_pool_address(token_1, token_2)
-        lp_balance = account.get_lp_balance(pool_address, 'zks_era_' + self.network)
-        approved_amount = self.check_approval(account, self.rpc.to_checksum_address(pool_address),
-                                              self.router_address)
-        print(approved_amount)
-        if approved_amount < lp_balance:
-            self.approve_token(account, pool_address, lp_balance)
+        # pool_address = self.get_pool_address(token_1, token_2)
+        # lp_balance = account.get_lp_balance(pool_address, 'zks_era_' + self.network)
+        # approved_amount = self.check_approval(account, self.rpc.to_checksum_address(pool_address),
+        #                                       self.router_address)
+        # print(approved_amount)
+        # if approved_amount < lp_balance:
+        #     self.approve_token(account, pool_address, lp_balance)
 
         tx_data = self.construct_burn_lp_data(account, token_1, token_2, slippage)
         tx = {'chainId': self.chain_id,
@@ -227,9 +227,11 @@ class SyncSwap(DEX):
 
         return receive_lp
 
-    def calculate_receive_eth(self, pool_address, lp_balance, slippage=0.01):
+    def calculate_receive_eth(self, pool_address, lp_balance, slippage=0.005):
         pool_contract = self.rpc.eth.contract(address=pool_address, abi=self.pool_abi)
-        lp_balance = Decimal(lp_balance) / Decimal(10 ** 18)
+        # lp_balance = Decimal(lp_balance) / Decimal(10 ** 18)
+        total_lp = pool_contract.functions.totalSupply().call()
+        pool_share = lp_balance / Decimal(total_lp)
         token_0_address = pool_contract.functions.token0().call()
         # token_1_address = pool_contract.functions.token1().call()
         reserve_0 = pool_contract.functions.reserve0().call()
@@ -239,8 +241,8 @@ class SyncSwap(DEX):
             reserve_eth = Decimal(reserve_0) / Decimal(10 ** 18)
         else:
             reserve_eth = Decimal(reserve_1) / Decimal(10 ** 18)
-
+        #
         total_pool = reserve_eth * 2
-        receive_eth = total_pool * lp_balance * Decimal((1 - slippage))
-        receive_eth = self.rpc.to_wei(receive_eth, 'ether')
+        receive_eth = total_pool * pool_share * Decimal((1 - slippage))
+        # receive_eth = self.rpc.to_wei(receive_eth, 'ether')
         return receive_eth
