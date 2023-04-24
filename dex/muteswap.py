@@ -8,7 +8,7 @@ from web3 import Web3
 
 
 class MuteSwap(DEX):
-    def __init__(self, name, network='testnet'):
+    def __init__(self, name='muteswap', network='testnet'):
         super().__init__(name, network)
         if network == 'testnet':
             self.token_list['eth'] = '0x20b28b1e4665fff290650586ad76e977eab90c5d'
@@ -39,7 +39,7 @@ class MuteSwap(DEX):
         else:
             amount_in = int(Decimal(amount_in * 10 ** 6))
         amount_out = pair_contract.functions.current(
-            self.token_list[token], amount_in).call()
+            self.rpc.to_checksum_address(self.token_list[token]), amount_in).call()
         return amount_out
 
     def get_token_rate(self, pair_address):
@@ -62,7 +62,7 @@ class MuteSwap(DEX):
             value = int(Decimal(amount * 10 ** 6))
 
         swap_pair_address = self.get_pair_address(
-            token_from_address, token_to_address)
+            token_from, token_to)
         amount_out = self.get_amount_out(swap_pair_address, token_from, amount)
         amount_out_min = int(Decimal(amount_out * (1 - slippage)))
 
@@ -88,6 +88,8 @@ class MuteSwap(DEX):
             'chainId': self.chain_id,
         }
 
+        balance = self.rpc.eth.get_balance(account.address)
+        print("ETH balance: ", balance)
         # Estimate gas for the transaction
         estimated_gas = swap_function.estimate_gas(transaction_object)
 
