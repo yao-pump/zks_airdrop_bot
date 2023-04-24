@@ -52,15 +52,11 @@ if network == 'testnet':
         "0x96c2Cf9edbEA24ce659EfBC9a6e3942b7895b5e8")
     FACTORY_ADDRESS = w3_zks.to_checksum_address(
         "0xCc05E242b4A82f813a895111bCa072c8BBbA4a0e")
-    PAIR_ADDRESS = w3_zks.to_checksum_address(
-        "0x0f6d5b6c5c6b5f0e5c7f8b0d0c7e9e6f5d7c0a6f")
 else:
     ROUTER_ADDRESS = w3_zks.to_checksum_address(
         "0x8B791913eB07C32779a16750e3868aA8495F5964")
     FACTORY_ADDRESS = w3_zks.to_checksum_address(
         "0x40be1cBa6C5B47cDF9da7f963B6F761F4C60627D")
-    PAIR_ADDRESS = w3_zks.to_checksum_address(
-        "0x0f6d5b6c5c6b5f0e5c7f8b0d0c7e9e6f5d7c0a6f")
 
 # contract instances
 router_contract = w3_zks.eth.contract(address=ROUTER_ADDRESS, abi=router_abi)
@@ -149,7 +145,7 @@ def swap_tokens(token_from='eth', token_to='usdc', amount=0.001, slippage=0.05):
     estimated_gas = swap_function.estimate_gas(transaction_object)
 
     # Add a buffer to the estimated gas (e.g., 10%)
-    gas_limit = int(estimated_gas * 1.1)
+    gas_limit = int(estimated_gas * 1.2)
 
     # Update the transaction object with the gas limit and gas price
     transaction_object.update({
@@ -227,7 +223,7 @@ def add_liquidity(token='usdc', amount=2):
     }
 
     estimated_gas = add_liquidity_function.estimate_gas(transcation_object)
-    gas_limit = int(estimated_gas * 1.1)
+    gas_limit = int(estimated_gas * 1.2)
 
     # Update the transaction object with the gas limit and gas price
     transcation_object.update({
@@ -249,8 +245,101 @@ def add_liquidity(token='usdc', amount=2):
     tx_receipt = w3_zks.eth.wait_for_transaction_receipt(tx_hash)
 
 
+def get_liquidity_balance(account, pair_address):
+    # Create a contract instance for the pair using the pair's ABI
+    pair_contract = w3_zks.eth.contract(address=pair_address, abi=pair_abi)
+
+    # Get the user's liquidity balance in the pool
+    liquidity_balance = pair_contract.functions.balanceOf(
+        account['address']).call()
+
+    return liquidity_balance
+
+
+def remove_liquidity(token='usdc', liquidity_rate=1.0):
+    token_address = ADDRESS[token]
+
+    # Get the user's liquidity balance in the pool
+    liquidity_balance = get_liquidity_balance(acc, get_pair_address())
+    liquidity = int(liquidity_balance * liquidity_rate)
+
+    # Get reserves
+    reserve_usdc, reserve_eth = get_reserves(get_pair_address())
+    # get total lp supply
+    total_lp_supply = get_total_lp(get_pair_address(), pair_abi)
+
+    Slippage = 0.001
+    amount_token_min = int(
+        ((reserve_usdc/total_lp_supply) * liquidity_balance)*(1-Slippage))
+    amount_eth_min = int(
+        ((reserve_eth/total_lp_supply) * liquidity_balance)*(1-Slippage))
+    to = w3_zks.to_checksum_address(acc['address'])
+    deadline = int(time.time()) + 60 * 60  # Deadline: 1 hour from now
+    stable = False
+
+    # Approve router contract to spend the liquidity tokens on behalf of the user
+    pair_address = get_pair_address()
+    approve_token(pair_address, ROUTER_ADDRESS, amount_token_min, acc)
+
+    remove_liquidity_function = router_contract.functions.removeLiquidityETHSupportingFeeOnTransferTokens(
+        token_address,
+        liquidity,
+        amount_token_min,
+        amount_eth_min,
+        to,
+        deadline,
+        stable
+    )
+
+    transaction_object = {
+        'from': acc['address'],
+        'nonce': w3_zks.eth.get_transaction_count(acc['address']),
+        'chainId': chain_id,
+    }
+    estimated_gas = remove_liquidity_function.estimate_gas(transaction_object)
+    gas_limit = int(estimated_gas * 1.2)
+
+    # Update the transaction object with the gas limit and gas price
+    transaction_object.update({
+        'gas': gas_limit,
+        'gasPrice': w3_zks.eth.gas_price,
+        'nonce': w3_zks.eth.get_transaction_count(acc['address']),
+    })
+
+    remove_tx = remove_liquidity_function.build_transaction(transaction_object)
+    signed_remove_tx = w3_zks.eth.account.sign_transaction(
+        remove_tx, acc['private_key'])
+    tx_hash = w3_zks.eth.send_raw_transaction(signed_remove_tx.rawTransaction)
+
+    tx_receipt = w3_zks.eth.wait_for_transaction_receipt(tx_hash)
+    return tx_receipt
+
+
+def get_reserves(pair_address):
+    pair_contract = w3_zks.eth.contract(address=pair_address, abi=pair_abi)
+    reserves = pair_contract.functions.getReserves().call()
+    token0_address = pair_contract.functions.token0().call()
+
+    if token0_address.lower() == ADDRESS['eth'].lower():
+        reserve_eth = reserves[0]
+        reserve_usdc = reserves[1]
+    else:
+        reserve_eth = reserves[1]
+        reserve_usdc = reserves[0]
+
+    return reserve_usdc, reserve_eth
+
+
+def get_total_lp(pair_address, pair_abi):
+    pair_contract = w3_zks.eth.contract(address=pair_address, abi=pair_abi)
+    total_supply = pair_contract.functions.totalSupply().call()
+    return total_supply
+
+
 if __name__ == "__main__":
     # swap_tokens(amount=0.1)
     # swap_tokens(token_from='usdc', token_to='eth', amount=500, slippage=0.1)
 
     add_liquidity(token='usdc', amount=100)
+
+    # remove_liquidity(token='usdc', liquidity_rate=1.0)
