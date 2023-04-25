@@ -5,6 +5,7 @@ import json
 from web3 import Web3, HTTPProvider
 
 from utils import execute_tx
+import random
 
 
 class DEX:
@@ -69,6 +70,8 @@ class DEX:
         func = token_contract.functions.approve(
             self.router_address, int(Decimal(amount * 10 ** 6)))
         gas_estimate = func.estimate_gas({'from': account.address})
+        # get random gas
+        gas_estimate = int(gas_estimate*random.uniform(1, 1.2))
 
         tx = func.build_transaction(
             {'chainId': self.chain_id,
@@ -79,6 +82,25 @@ class DEX:
                     account.address)})
         print("Transaction: approve token")
         success = execute_tx(tx, account, self.rpc)
+
+    def approve_token_mute(self, account, token, amount):
+        token_contract = self.rpc.eth.contract(
+            address=token, abi=self.pool_abi)
+        approve_function = token_contract.functions.approve(
+            self.router_address, amount)
+
+        transaction_object = {
+            'from': account.address,
+            'gas': 15000000,
+            'gasPrice': self.rpc.eth.gas_price,
+            'nonce': self.rpc.eth.get_transaction_count(account.address),
+            'chainId': self.chain_id,
+        }
+        estimated_gas = approve_function.estimate_gas(transaction_object)
+        transaction_object['gas'] = estimated_gas
+
+        approve_tx = approve_function.build_transaction(transaction_object)
+        success = execute_tx(approve_tx, account, self.rpc)
 
     def check_approval(self, account, token, spender_address):
         if len(token) < 10:

@@ -82,6 +82,8 @@ def get_amount_out(pair_address, token, amount_in):
         ADDRESS[token], amount_in).call()
     return amount_out
 
+# approve_token(pair_address, ROUTER_ADDRESS, amount_token_min, acc)
+
 
 def approve_token(token_address, spender, amount, account):
     token_contract = w3_zks.eth.contract(address=token_address, abi=pair_abi)
@@ -221,8 +223,12 @@ def add_liquidity(token='usdc', amount=2):
         'chainId': chain_id,
         'value': amountETHMin,
     }
-
-    estimated_gas = add_liquidity_function.estimate_gas(transcation_object)
+    try:
+        estimated_gas = add_liquidity_function.estimate_gas(transcation_object)
+        print("estimated gas: ", estimated_gas)
+    except BaseException as e:
+        estimated_gas = 2000000
+        print('estimate gas error: ', e)
     gas_limit = int(estimated_gas * 1.2)
 
     # Update the transaction object with the gas limit and gas price
@@ -296,7 +302,15 @@ def remove_liquidity(token='usdc', liquidity_rate=1.0):
         'nonce': w3_zks.eth.get_transaction_count(acc['address']),
         'chainId': chain_id,
     }
-    estimated_gas = remove_liquidity_function.estimate_gas(transaction_object)
+    try:
+        estimated_gas = remove_liquidity_function.estimate_gas(
+            transaction_object)
+        print("estimated gas: ", estimated_gas)
+    except BaseException as e:
+        estimated_gas = 3300000
+        print("Unable to estimate_gas, error message: ", e)
+        print("Using gas limit of ", estimated_gas)
+
     gas_limit = int(estimated_gas * 1.2)
 
     # Update the transaction object with the gas limit and gas price
@@ -312,6 +326,8 @@ def remove_liquidity(token='usdc', liquidity_rate=1.0):
     tx_hash = w3_zks.eth.send_raw_transaction(signed_remove_tx.rawTransaction)
 
     tx_receipt = w3_zks.eth.wait_for_transaction_receipt(tx_hash)
+    # print('transaction_hash: ', tx_hash)
+    # print('Transaction receipt: ', tx_receipt)
     return tx_receipt
 
 
@@ -340,6 +356,6 @@ if __name__ == "__main__":
     # swap_tokens(amount=0.1)
     # swap_tokens(token_from='usdc', token_to='eth', amount=500, slippage=0.1)
 
-    add_liquidity(token='usdc', amount=100)
+    # add_liquidity(token='usdc', amount=500)
 
-    # remove_liquidity(token='usdc', liquidity_rate=1.0)
+    remove_liquidity(token='usdc', liquidity_rate=1.0)

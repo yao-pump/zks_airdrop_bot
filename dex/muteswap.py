@@ -27,7 +27,7 @@ class MuteSwap(DEX):
 
         # Get the user's liquidity balance in the pool
         liquidity_balance = pair_contract.functions.balanceOf(
-            account['address']).call()
+            account.address).call()
 
         return liquidity_balance
 
@@ -91,7 +91,11 @@ class MuteSwap(DEX):
         balance = self.rpc.eth.get_balance(account.address)
         print("ETH balance: ", balance)
         # Estimate gas for the transaction
-        estimated_gas = swap_function.estimate_gas(transaction_object)
+        try:
+            estimated_gas = swap_function.estimate_gas(transaction_object)
+            print("estimated_gas: ", estimated_gas)
+        except Exception as e:
+            print("estimated_gas failed: ", e)
 
         # Add a buffer to the estimated gas (e.g., 10%)
         gas_limit = int(estimated_gas * 1.2)
@@ -159,7 +163,14 @@ class MuteSwap(DEX):
             'value': amountETHMin,
         }
 
-        estimated_gas = add_liquidity_function.estimate_gas(transcation_object)
+        try:
+            estimated_gas = add_liquidity_function.estimate_gas(
+                transcation_object)
+            print("estimated_gas: ", estimated_gas)
+        except Exception as e:
+            estimated_gas = 100000000
+            print("estimated_gas failed: ", e)
+
         gas_limit = int(estimated_gas * 1.2)
 
         # Update the transaction object with the gas limit and gas price
@@ -175,24 +186,26 @@ class MuteSwap(DEX):
 
     def remove_liquidity(self, account, token_1, token_2, liquidity_rate):
 
-        if token_1 == 'usdc':
+        if token_1 != 'eth':
             token_address = self.token_list[token_1]
             token_to = token_1
-        elif token_2 == 'usdc':
+            token_from = token_2
+        elif token_2 != 'eth':
             token_address = self.token_list[token_2]
             token_to = token_2
+            token_from = token_1
 
         # Get the user's liquidity balance in the pool
         liquidity_balance = self.get_liquidity_balance(
-            account, self.get_pair_address(token_1, token_2))
+            account, self.get_pair_address(token_from, token_to))
         liquidity = int(liquidity_balance * liquidity_rate)
 
         # Get reserves
         reserve_usdc, reserve_eth = self.get_reserves(
-            self.get_pair_address(token_1, token_2))
+            self.get_pair_address(token_from, token_to))
         # get total lp supply
         total_lp_supply = self.get_total_lp(
-            self.get_pair_address(token_1, token_2), self.pool_abi)
+            self.get_pair_address(token_from, token_to), self.pool_abi)
 
         Slippage = 0.001
         amount_token_min = int(
@@ -204,7 +217,10 @@ class MuteSwap(DEX):
         stable = False
 
         # Approve router contract to spend the liquidity tokens on behalf of the user
-        self.approve_token(account, token_to, amount_token_min)
+        # self.approve_token(self.get_pair_address(
+        #     token_from, token_to), token_to, liquidity)
+        self.approve_token_mute(account, self.get_pair_address(
+            token_from, token_to), liquidity)
 
         remove_liquidity_function = self.router_contract.functions.removeLiquidityETHSupportingFeeOnTransferTokens(
             token_address,
@@ -221,8 +237,14 @@ class MuteSwap(DEX):
             'nonce': self.rpc.eth.get_transaction_count(account.address),
             'chainId': self.chain_id,
         }
-        estimated_gas = remove_liquidity_function.estimate_gas(
-            transaction_object)
+
+        try:
+            estimated_gas = remove_liquidity_function.estimate_gas(
+                transaction_object)
+            print("estimated_gas: ", estimated_gas)
+        except Exception as e:
+            print("estimated_gas failed: ", e)
+
         gas_limit = int(estimated_gas * 1.2)
 
         # Update the transaction object with the gas limit and gas price
