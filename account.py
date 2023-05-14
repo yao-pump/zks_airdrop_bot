@@ -23,9 +23,14 @@ class Account:
 
     def get_balance(self, token, network_symbol='eth', network_type='testnet'):
         # Connect to the Ethereum provider
-        network = network_symbol + '_' + network_type
+        if network_type != '':
+            network = network_symbol + '_' + network_type
+        else:
+            network = network_symbol
         if network_symbol == 'zks_era':
             contract_address = zks_token_addresses[network_type][token]
+        else:
+            contract_address = token
 
         contract_address = rpcs[network].to_checksum_address(contract_address)
 

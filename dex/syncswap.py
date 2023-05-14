@@ -139,6 +139,7 @@ class SyncSwap(DEX):
         param_3 = '00000000000000000000000000000000000000000000000000000000000000c0'
         # param_4 = '0000000000000000000000000000000000000000000000000000000000000000'
         receive_eth = self.calculate_receive_eth(pool_address, lp_balance, slippage)
+        receive_eth = self.rpc.to_wei(receive_eth, 'ether')
         receive_eth = hex(receive_eth)[2:]
         print(lp_balance, receive_eth)
         param_4 = '0' * (64-len(receive_eth)) + receive_eth
@@ -185,17 +186,17 @@ class SyncSwap(DEX):
 
     def remove_liquidity(self, account, token_1, token_2, slippage=0.005):
         # approve LP token
-        # pool_address = self.get_pool_address(token_1, token_2)
-        # lp_balance = account.get_lp_balance(pool_address, 'zks_era_' + self.network)
-        # approved_amount = self.check_approval(account, self.rpc.to_checksum_address(pool_address),
-        #                                       self.router_address)
-        # print(approved_amount)
-        # if approved_amount < lp_balance:
-        #     self.approve_token(account, pool_address, lp_balance)
+        pool_address = self.get_pool_address(token_1, token_2)
+        lp_balance = account.get_lp_balance(pool_address, 'zks_era_' + self.network)
+        approved_amount = self.check_approval(account, self.rpc.to_checksum_address(pool_address),
+                                              self.router_address)
+        print(approved_amount)
+        if approved_amount < lp_balance:
+            self.approve_token(account, pool_address, lp_balance)
 
         tx_data = self.construct_burn_lp_data(account, token_1, token_2, slippage)
         tx = {'chainId': self.chain_id,
-                    'gas': 400000,
+                    'gas': 800000,
                     'gasPrice': self.rpc.eth.gas_price,
                     'from': account.address,
                     # 'value': value,
@@ -246,3 +247,4 @@ class SyncSwap(DEX):
         receive_eth = total_pool * pool_share * Decimal((1 - slippage))
         # receive_eth = self.rpc.to_wei(receive_eth, 'ether')
         return receive_eth
+

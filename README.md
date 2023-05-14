@@ -22,9 +22,11 @@ ZKSync interaction bot to earn airdrops
     - MuteSwap
         + Swap
         + Add liquidity
-    - Onchain Trade
+    - Izumiswap
         + Swap
         + Add liquidity
+    - zkDX
+    - Flux Exchange
 
 + Automated workflow
     1. Optional: Create a new wallet, deposit random amount of eth from CEX

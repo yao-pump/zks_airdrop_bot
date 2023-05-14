@@ -15,8 +15,13 @@ class DEX:
         self.token_list = zks_token_addresses[network]
         self.rpc = Web3(HTTPProvider(providers['zks_era_{}'.format(network)]))
         self.chain_id = chains['zks_era_{}'.format(network)]
-        self.router_address, self.factory_address, self.abi_paths = get_dex_info(
+        # self.router_address, self.factory_address, self.abi_paths = get_dex_info(
+        #     self.name, self.network)
+        self.addresses, self.abi_paths = get_dex_info(
             self.name, self.network)
+
+        self.factory_address = self.addresses['factory']
+        self.router_address = self.addresses['router']
 
         with open("config/{}".format(self.abi_paths['pool']), encoding='utf-8', errors='ignore') as json_data:
             self.pool_abi = json.load(json_data, strict=False)

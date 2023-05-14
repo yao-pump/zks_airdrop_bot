@@ -1,0 +1,14 @@
+[
+{
+  "name": "mint",
+  "inputs": [
+    {
+      "name": "uri",
+      "type": "string"
+    }
+  ],
+  "outputs": [],
+  "stateMutability": "payable",
+  "type": "function"
+}
+]

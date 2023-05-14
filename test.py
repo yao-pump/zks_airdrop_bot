@@ -1,7 +1,15 @@
+import time
+
+from web3 import Web3, HTTPProvider
+
+from cfg import providers
 from database import connect_mongodb, get_random_account, get_account
 from account import Account
 from dex.syncswap import SyncSwap
 from decimal import Decimal
+
+from nft.mint_square import MintSquare
+from nft.utils import get_random_image
 
 neworks = ['eth_mainnet', 'eth_testnet', 'zks_era_mainnet', 'zks_era_testnet']
 def test_account():
@@ -60,10 +68,39 @@ def test_approve():
     # pool_address = syncswap.get_pool_address('usdt', 'eth')
     syncswap.approve_token(acc, 'usdt', usdt_amount)
 
+
+def test_mint_square():
+    db = connect_mongodb()
+    acc_info = get_account(db, 2)
+    acc = Account(acc_info)
+    print(acc.address)
+
+    market = MintSquare(network='mainnet')
+
+    image_url, image_name = get_random_image()
+    print('Mint NFT for image: ', image_name)
+    upload_info = market.upload_image(image_url)
+
+    if upload_info:
+        time.sleep(1)
+        image_info = {"name": image_name, "attributes": [],
+                      "link": upload_info}
+        nft_info = market.get_nft_hash(image_info)
+        if nft_info:
+            market.mint_nft(nft_info, acc)
+
+
+    # 'https://mintsquare.sfo3.cdn.digitaloceanspaces.com/mintsquare/mintsquare/JMDMjYywZ2MU96ZGPgzdpX_1684019163135735914'
 if __name__ == '__main__':
     # test_account()
     # test_approve()
     # test_swap()
     # test_add_liquidity()
-    test_remove_liquidity()
+    # test_remove_liquidity()
     # test_pool()
+    # db = connect_mongodb()
+    # acc_info = get_account(db, 4)
+    # acc = Account(acc_info)
+    test_mint_square()
+
+
