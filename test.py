@@ -5,11 +5,13 @@ from web3 import Web3, HTTPProvider
 from cfg import providers
 from database import connect_mongodb, get_random_account, get_account
 from account import Account
+from dex.izumiswap import IzumiSwap
 from dex.syncswap import SyncSwap
 from decimal import Decimal
 
 from nft.mint_square import MintSquare
 from nft.utils import get_random_image
+from bridge.orbiter import bridge as orbiter_bridge
 
 neworks = ['eth_mainnet', 'eth_testnet', 'zks_era_mainnet', 'zks_era_testnet']
 def test_account():
@@ -40,7 +42,7 @@ def test_swap():
     acc_info = get_account(db, 3)
     acc = Account(acc_info)
     syncswap = SyncSwap(network='testnet')
-    syncswap.swap(acc, 'eth', 'usdt', 0.001, slippage=0.05)
+    syncswap.swap(acc, 'usdc', 'eth', 665763371979268731311347415, slippage=0.05)
 
 
 def test_add_liquidity():
@@ -71,7 +73,7 @@ def test_approve():
 
 def test_mint_square():
     db = connect_mongodb()
-    acc_info = get_account(db, 2)
+    acc_info = get_account(db, 0)
     acc = Account(acc_info)
     print(acc.address)
 
@@ -90,17 +92,33 @@ def test_mint_square():
             market.mint_nft(nft_info, acc)
 
 
-    # 'https://mintsquare.sfo3.cdn.digitaloceanspaces.com/mintsquare/mintsquare/JMDMjYywZ2MU96ZGPgzdpX_1684019163135735914'
+def test_izumi():
+    izumi_swap = IzumiSwap(network='testnet')
+    db = connect_mongodb()
+    acc_info = get_account(db, 3)
+    acc = Account(acc_info)
+    izi_amount = (acc.get_balance('izi', 'zks_era', 'testnet'))
+    print(izi_amount)
+    izumi_swap.swap_token(acc, 'eth', 'izi', 0.01)
+
+
+def test_orbiter():
+    db = connect_mongodb()
+    acc_info = get_account(db, 3)
+    acc = Account(acc_info)
+    orbiter_bridge(acc, 0.005)
+
 if __name__ == '__main__':
     # test_account()
     # test_approve()
-    # test_swap()
+    test_swap()
     # test_add_liquidity()
     # test_remove_liquidity()
     # test_pool()
     # db = connect_mongodb()
     # acc_info = get_account(db, 4)
     # acc = Account(acc_info)
-    test_mint_square()
-
+    # test_mint_square()
+    # test_izumi()
+    # test_orbiter()
 

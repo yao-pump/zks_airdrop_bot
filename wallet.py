@@ -1,9 +1,6 @@
 import os
 import json
 from getpass import getpass
-from web3 import Web3, HTTPProvider
-from utils import get_providers, get_accounts
-# from eth_account import Account
 import eth_account
 import secrets
 from database import insert_new_account, connect_mongodb

@@ -121,9 +121,9 @@
             "type": "uint256"
             },
             {
-            "internalType": "uint256",
+            "internalType": "string",
             "name": "deadline",
-            "type": "uint256"
+            "type": "string"
             }
         ],
         "internalType": "struct Swap.SwapAmountParams",

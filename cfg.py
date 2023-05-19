@@ -17,8 +17,6 @@ def get_providers():
 
 def get_dex_info(dex_name, network='testnet'):
     addresses = {}
-    router_address = None
-    factory_address = None
     abi_paths = {}
     if dex_name == 'syncswap':
         abi_paths['factory'] = 'syncswap_pool_factory_abi.json'
@@ -53,7 +51,7 @@ def get_dex_info(dex_name, network='testnet'):
         abi_paths['pool'] = 'izumiswap_pool_abi.json'
         abi_paths['liquid'] = 'izumiswap_liquid_abi.json'
         abi_paths['quoter'] = 'izumiswap_quoter_abi.json'
-        abi_paths['swap'] = 'izumiswap_swap_abi.json'
+        abi_paths['router'] = 'izumiswap_swap_abi.json'
 
         if network == 'testnet':
             router_address = '0x3040EE148D09e5B92956a64CDC78b49f48C0cDdc'
@@ -106,7 +104,9 @@ zks_token_addresses = {
     'testnet': {'eth': '0x294cB514815CAEd9557e6bAA2947d6Cf0733f014',
                 'usdc': '0x0faF6df7054946141266420b43783387A78d82A9',
                 'link': '0x40609141Db628BeEE3BfAB8034Fc2D8278D0Cc78',
-                'usdt': '0xfcEd12dEbc831D3a84931c63687C395837D42c2B'},
+                'usdt': '0xfcEd12dEbc831D3a84931c63687C395837D42c2B',
+                'izi': '0xA5900cce51c45Ab9730039943B3863C822342034',
+                },
 
 }
 with open("config/token_abi.json", encoding='utf-8', errors='ignore') as json_data:

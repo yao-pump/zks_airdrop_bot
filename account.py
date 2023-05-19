@@ -1,6 +1,7 @@
 from cfg import rpcs, chains, zks_token_addresses, token_abi
-from utils import get_gas_price, get_contract_address
+from utils import get_gas_price
 from decimal import Decimal
+
 
 class Account:
     def __init__(self, account_info) -> None:
@@ -58,7 +59,7 @@ class Account:
             'gasPrice': gas_price,
             'gas': 21000,
             'to': rpcs[network].to_checksum_address(to.address),
-            'value': rpcs[network].to_wei(amount+0.0005, 'ether'),
+            'value': rpcs[network].to_wei(amount, 'ether'),
             'chainId': chains[network],
         }
         signed_txn = rpcs[network].eth.account.sign_transaction(transaction, self.private_key)

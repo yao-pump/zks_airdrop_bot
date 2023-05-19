@@ -66,6 +66,7 @@ class DEX:
         pass
 
     def approve_token(self, account, token, amount):
+        # check whether the input token is an address or a token symbol
         if len(token) < 10:
             token_contract = self.rpc.eth.contract(address=self.rpc.to_checksum_address(self.token_list[token]),
                                                    abi=token_abi)
@@ -87,7 +88,7 @@ class DEX:
                     account.address)})
         print("Transaction: approve token")
         success = execute_tx(tx, account, self.rpc)
-
+        return success
     def approve_token_mute(self, account, token, amount):
         token_contract = self.rpc.eth.contract(
             address=token, abi=self.pool_abi)
