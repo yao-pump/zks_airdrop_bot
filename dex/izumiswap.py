@@ -34,13 +34,18 @@ class IzumiSwap(DEX):
         # try:
         multicall = []
 
-        deadline = '0xffffffff'
+        deadline = int('0xffffffff', 16)
         # current_time = int(time.time())
         # deadline = current_time + 1800
         path = self.get_token_chain_path(token_from, token_to)
         token_info_from = get_token_info(self.token_list[token_from], self.rpc)
         amount_out, _ = self.query_swap(path, token_from, token_info_from, amount)
         amount_out_min = int(Decimal(amount_out * (1-slippage)))
+        final_recipient_address = account.address
+        if token_to == 'eth':
+            inner_recipient_address = '0x0000000000000000000000000000000000000000'
+        else:
+            inner_recipient_address = final_recipient_address
 
         if token_from != 'eth':
             swap_amount = int(Decimal(amount * 10 ** token_info_from['decimal']))
@@ -49,17 +54,17 @@ class IzumiSwap(DEX):
             swap_amount = self.rpc.to_wei(amount, 'ether')
             value = swap_amount
 
-        func = self.router_contract.functions.swapAmount([path, self.rpc.to_checksum_address(account.address), swap_amount,
+        func = self.router_contract.functions.swapAmount([path, inner_recipient_address, swap_amount,
                                                          amount_out_min, deadline])
         # gas_estimate = func.estimate_gas({'from': account.address})
 
-        multicall.append(self.router_contract.encodeABI(fn_name='swapAmount', args=[[path, account.address, swap_amount,amount_out_min, deadline]]))
+        multicall.append(self.router_contract.encodeABI(fn_name='swapAmount', args=[[path, inner_recipient_address, swap_amount, amount_out_min, deadline]]))
         if token_from == 'eth':
             multicall.append(self.router_contract.encodeABI(fn_name='refundETH'))
 
         if token_to == 'eth':
             multicall.append(self.router_contract.encodeABI(fn_name='unwrapWETH9', args=[0, account.address]))
-        multicall = [1]
+        # multicall = [1]
         if len(multicall) == 1:
             tx = func.build_transaction(
             {'chainId': self.chain_id,

@@ -18,8 +18,8 @@ marker_address_test = [
 ]
 
 marker_address = {
-    'main': marker_address_main,
-    'test': marker_address_test
+    'mainnet': marker_address_main,
+    'testnet': marker_address_test
 }
 
 identify_code_main = {
@@ -33,12 +33,12 @@ identify_code_test = {
 }
 
 identify_code = {
-    'main': identify_code_main,
-    'test': identify_code_test
+    'mainnet': identify_code_main,
+    'testnet': identify_code_test
 }
 
-def bridge(account, amount, source_network="arb", destination_network="zks_era", network_type='test'):
-    source_network = source_network+'_'+network_type
+def bridge(account, amount, source_network="arb", destination_network="zks_era", network_type='testnet'):
+    source_network = source_network + '_' + network_type
     bridge_address = random.choice(marker_address[network_type])
     if account.get_eth_balance(source_network) <= amount:
         print('insufficient balance')

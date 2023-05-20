@@ -36,7 +36,7 @@ class DEX:
             self.router_contract = self.rpc.eth.contract(
                 address=self.router_address, abi=self.router_abi)
 
-    def swap(self, account, token_from, token_to, amount, slippage):
+    def swap(self, account, token_from, token_to, amount, slippage=0.015):
         # approve token
         if token_from != 'eth':
             value = int(Decimal(amount * 10 ** 6))

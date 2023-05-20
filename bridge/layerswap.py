@@ -5,7 +5,11 @@ import time
 # 0x4699c4f5bf4819b21fd3236b8690f33444651b1f
 from playwright.sync_api import sync_playwright
 
-def bridge(account, amount, source_network="Arbitrum One", destination_network="zkSync Era"):
+networks = {
+    'arb': "Arbitrum One",
+    'zks_era': "zkSync Era"
+}
+def bridge(account, amount, source_network="arb", destination_network="zks_era", network_type="test"):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
@@ -13,11 +17,11 @@ def bridge(account, amount, source_network="Arbitrum One", destination_network="
         print(page.title())
         page.get_by_role("button", name="Source", exact=True).click()
         time.sleep(1)
-        page.get_by_text(source_network, exact=True).click()
+        page.get_by_text(networks[source_network], exact=True).click()
         time.sleep(1)
         page.get_by_role("button", name="Destination", exact=True).click()
         time.sleep(1)
-        page.get_by_text(destination_network, exact=True).click()
+        page.get_by_text(networks[destination_network], exact=True).click()
         page.get_by_role("textbox").fill(str(amount))
         time.sleep(1)
         page.get_by_role("button", name="0x").click()
@@ -35,8 +39,8 @@ def bridge(account, amount, source_network="Arbitrum One", destination_network="
         deposit_address = page.get_by_text("0x").text_content()
         print(deposit_address)
 
-        if source_network == "Arbitrum One":
-            transfer_network = 'arb'
+        # if networks[source_network] == "Arbitrum One":
+        transfer_network = source_network + '_' + network_type
         account.transfer_eth(deposit_address, amount, network=transfer_network)
         time.sleep(10)
     # browser.close()

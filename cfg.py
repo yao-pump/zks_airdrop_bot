@@ -88,14 +88,14 @@ zks_era_test_rpc = Web3(HTTPProvider(endpoint_uri=providers['zks_era_testnet']))
 arb_rpc = Web3(HTTPProvider(endpoint_uri='https://arb1.arbitrum.io/rpc'))
 rpcs = {'eth_mainnet': eth_main_rpc, 'eth_testnet': eth_test_rpc,
         'zks_era_mainnet': zks_era_main_rpc, 'zks_era_testnet': zks_era_test_rpc,
-        'arb': arb_rpc}
+        'arb_mainnet': arb_rpc}
 
 chains = {
     'eth_mainnet': 1,
     'eth_testnet': 5,
     'zks_era_mainnet': 324,
     'zks_era_testnet': 280,
-    'arb': 42161,
+    'arb_mainnet': 42161,
 }
 
 zks_token_addresses = {
