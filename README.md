@@ -14,21 +14,28 @@ ZKSync interaction bot to earn airdrops
     - NFT mint
 
 + ZKSync v2 (era) interaction
-    - Official bridge
-    - NFT mint
-    - SyncSwap
-        + Swap
-        + Add liquidity
-    - MuteSwap
-        + Swap
-        + Add liquidity
-    - Izumiswap
-        + Swap
-        + Add liquidity
-    - zkDX
-    - Flux Exchange
+    - Bridge
+        + Official bridge
+        + Orbiter
+        + Layerswap
+        + Bungee
+    - NFT
+        + MintSquare
+    - Dex
+      - SyncSwap
+          + Swap
+          + Add liquidity
+      - MuteSwap
+          + Swap
+          + Add liquidity
+      - Izumiswap
+          + Swap
+          + Add liquidity
+    - Other possible airdrop projects
+        + zkDX
+        + Flux Exchange
 
-+ Automated workflow
+## Automated workflow
     1. Optional: Create a new wallet, deposit random amount of eth from CEX
     2. Randomly select a wallet from database
     3. Randomly select an unfinished task from above interactions to do

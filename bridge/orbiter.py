@@ -50,11 +50,15 @@ def bridge(account, amount, source_network="arb", destination_network="zks_era",
 
     amount = rpcs[source_network].to_wei(amount, 'ether')
     amount += identify_code[network_type][destination_network]
+    if 'eth' in source_network:
+        gas = 21000
+    else:
+        gas = 800000
 
     transaction = {
         'nonce': nonce,
         'gasPrice': gas_price,
-        'gas': 21000,
+        'gas': gas,
         'to': rpcs[source_network].to_checksum_address(bridge_address),
         'value': amount,
         'chainId': chains[source_network],

@@ -9,7 +9,7 @@ networks = {
     'arb': "Arbitrum One",
     'zks_era': "zkSync Era"
 }
-def bridge(account, amount, source_network="arb", destination_network="zks_era", network_type="test"):
+def bridge(account, amount, source_network="arb", destination_network="zks_era", network_type="testnet"):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
@@ -42,7 +42,7 @@ def bridge(account, amount, source_network="arb", destination_network="zks_era",
         # if networks[source_network] == "Arbitrum One":
         transfer_network = source_network + '_' + network_type
         account.transfer_eth(deposit_address, amount, network=transfer_network)
-        time.sleep(10)
+        time.sleep(30)
     # browser.close()
 
 def send_swap_request(amount, destination_address, source_network="ARBITRUM_MAINNET", destination_network="ZKSYNCERA_MAINNET", ):

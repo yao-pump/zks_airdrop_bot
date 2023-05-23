@@ -1,0 +1,41 @@
+[{
+    "constant": false,
+    "inputs": [
+        {
+            "name": "_path",
+            "type": "address[]"
+        },
+        {
+            "name": "_indexToken",
+            "type": "address"
+        },
+        {
+            "name": "_amountIn",
+            "type": "uint256"
+        },
+        {
+            "name": "_minOut",
+            "type": "uint256"
+        },
+        {
+            "name": "_sizeDelta",
+            "type": "uint256"
+        },
+        {
+            "name": "_isLong",
+            "type": "bool"
+        },
+        {
+            "name": "_price",
+            "type": "uint256"
+        },
+        {
+            "name": "_updateData",
+            "type": "bytes[]"
+        }
+    ],
+    "name": "increasePosition",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+}]

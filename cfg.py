@@ -1,7 +1,16 @@
 import json
-
+import secrets
 from web3 import Web3, HTTPProvider
+import eth_account
 
+def create_wallet():
+    priv = secrets.token_hex(32)
+    private_key = "0x" + priv
+    # print("SAVE BUT DO NOT SHARE THIS:", private_key)
+    acct = eth_account.Account.from_key(private_key)
+    print("Address:", acct.address)
+    account = {'address': acct.address, 'private_key': private_key}
+    return account
 
 def load_json(filename):
     with open(filename, 'r') as f:
@@ -100,7 +109,12 @@ chains = {
 
 zks_token_addresses = {
     'mainnet': {'eth': '0x5aea5775959fbc2557cc8789bc1bf90a239d9a91',
-                'usdc': '0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4'},
+                'usdc': '0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4',
+                'tudsc': '0x7455eb101303877511d73c5841Fbb088801f9b12',
+                'cheems': '0xd599dA85F8Fc4877e61f547dFAcffe1238A7149E',
+                'zat': '0x47ef4a5641992a72cfd57b9406c9d9cefee8e0c4',
+                'izi': '0x9ad37205d608b8b219e6a2573f922094cec5c200'
+                },
     'testnet': {'eth': '0x294cB514815CAEd9557e6bAA2947d6Cf0733f014',
                 'usdc': '0x0faF6df7054946141266420b43783387A78d82A9',
                 'link': '0x40609141Db628BeEE3BfAB8034Fc2D8278D0Cc78',

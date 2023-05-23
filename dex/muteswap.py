@@ -98,7 +98,7 @@ class MuteSwap(DEX):
             print("estimated_gas failed: ", e)
 
         # Add a buffer to the estimated gas (e.g., 10%)
-        gas_limit = int(estimated_gas * 1.2)
+        gas_limit = int(estimated_gas * 1.1)
 
         # Update the transaction object with the gas limit and gas price
         transaction_object.update({

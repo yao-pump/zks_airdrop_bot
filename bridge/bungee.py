@@ -42,11 +42,12 @@ def bridge(account, amount, source_network="arb", destination_network="zks_era",
         value = int(approval_transaction_data['result']['value'], 16)
         chain_id = approval_transaction_data['result']['chainId']
         # gas = estimate_gas(tx_data, rpc, rpc.to_checksum_address(tx_target), account.address)
-        gas = int(route['userTxs'][0]['gasFees']['gasAmount'])
+        gas_price = rpc.eth.gas_price
+        # gas = int(int(route['userTxs'][0]['gasFees']['gasAmount']) / gas_price)
 
         tx = {'chainId': chain_id,
-                'gas': gas,
-                'gasPrice': rpc.eth.gas_price,
+                'gas': 800000,
+                'gasPrice': gas_price,
                 'from': account.address,
                 'value': value,
                 'nonce': rpc.eth.get_transaction_count(
@@ -65,15 +66,15 @@ def bridge(account, amount, source_network="arb", destination_network="zks_era",
     # print('Bridging Transaction : ', receipt.hex())
 
     # Checks status of transaction every 20 secs
-    while True:
-        status = get_bridge_status(tx_hash, chains[source_network+'_'+network_type],
-                                   chains[destination_network+'_'+network_type])
-        print('SOURCE TX : {}\nDEST TX : {}'.format(status['result']['sourceTxStatus'], status
-        ['result']['destinationTxStatus']))
-
-        if status['result']['destinationTxStatus'] == "COMPLETED":
-            print('DEST TX HASH :', status['result']['destinationTransactionHash'])
-            break
+    # while True:
+    #     status = get_bridge_status(tx_hash, chains[source_network+'_'+network_type],
+    #                                chains[destination_network+'_'+network_type])
+    #     print('SOURCE TX : {}\nDEST TX : {}'.format(status['result']['sourceTxStatus'], status
+    #     ['result']['destinationTxStatus']))
+    #
+    #     if status['result']['destinationTxStatus'] == "COMPLETED":
+    #         print('DEST TX HASH :', status['result']['destinationTransactionHash'])
+    #         break
 # Helper Functions
 
 def get_quote(from_chain_id, from_token_address, to_chain_id, to_token_address, from_amount, user_address, unique_routes_per_bridge, sort, single_tx_only):

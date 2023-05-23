@@ -33,18 +33,23 @@ def insert_document(client, database, collection, document):
 def insert_new_account(client, account_info):
     document = {'address': account_info['address'],
                 'private_key': account_info['private_key'],
-                'transactions': {},
+                'num_txs': 0,
                 'eth_main_balance': 0,
-                'eth_zks_lite_balance': 0,
+                'other_balance': {},
                 'eth_zks_era_balance': 0,
                 'syncswap_swap': 0,
                 'sync_swap_liquidity': 0,
                 'mute_swap': 0,
                 'mute_liquidity': 0,
-                'ot_swap': 0,
-                'ot_liquidity': 0,
+                'izumi_swap': 0,
+                'izumi_liquidity': 0,
+                'mints_quare': 0,
+                'zkdx': 0,
                 'fund_from': '0x',
-                'fund_to': '0x'}
+                'fund_to': '0x',
+                'last_tx_time': None,
+                'gas_used': 0,
+                }
     
     insert_document(client, database='web3', collection='accounts', document=document)
 
@@ -115,5 +120,5 @@ def update_account(client, account_address, field_name, field_value, database='w
 # Example usage:
 if __name__ == '__main__':
     client = connect_mongodb()
-    account = get_random_account(client)
-    update_account(client, account['address'], 'eth_main_balance', 0)
+    # account = get_random_account(client)
+    # update_account(client, account['address'], 'eth_main_balance', 0)

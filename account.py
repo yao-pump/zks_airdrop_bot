@@ -1,5 +1,5 @@
 from cfg import rpcs, chains, zks_token_addresses, token_abi
-from utils import get_gas_price
+from utils import get_gas_price, execute_tx, get_token_info
 from decimal import Decimal
 
 
@@ -40,12 +40,18 @@ class Account:
 
         # Get the token balance
         balance = contract.functions.balanceOf(self.address).call()
-        balance = Decimal(balance) / Decimal(10 ** 6)
+
+        token_info = get_token_info(contract_address, rpcs[network])
+        balance = Decimal(balance) / Decimal(10 ** token_info['decimal'])
         return balance
 
 
 
     def transfer_eth(self, to, amount, network='eth_mainnet', nonce=None):
+        if type(to) == str:
+            to_address = to
+        else:
+            to_address = to.address
         if self.get_eth_balance(network) <= amount:
             print('insufficient balance')
             return
@@ -54,15 +60,21 @@ class Account:
 
         gas_price = get_gas_price(network)
 
+        if 'eth' in network:
+            gas = 21000
+        else:
+            gas = 800000
+
         transaction = {
             'nonce': nonce,
             'gasPrice': gas_price,
-            'gas': 21000,
-            'to': rpcs[network].to_checksum_address(to.address),
+            'gas': gas,
+            'to': rpcs[network].to_checksum_address(to_address),
             'value': rpcs[network].to_wei(amount, 'ether'),
             'chainId': chains[network],
         }
-        signed_txn = rpcs[network].eth.account.sign_transaction(transaction, self.private_key)
-        transaction_hash = rpcs[network].eth.send_raw_transaction(signed_txn.rawTransaction)
-        print(f'Transaction sent! TX hash: {transaction_hash.hex()}')
-
+        # signed_txn = rpcs[network].eth.account.sign_transaction(transaction, self.private_key)
+        # transaction_hash = rpcs[network].eth.send_raw_transaction(signed_txn.rawTransaction)
+        # print(f'Transaction sent! TX hash: {transaction_hash.hex()}')
+        success = execute_tx(transaction, self, rpcs[network])
+        return success

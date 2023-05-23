@@ -3,7 +3,7 @@ from eth_abi import encode
 from dex.dex import DEX
 import time
 from cfg import token_abi
-from utils import execute_tx
+from utils import execute_tx, get_token_info
 
 
 class SyncSwap(DEX):
@@ -26,7 +26,8 @@ class SyncSwap(DEX):
         if token_from == 'eth':
             value = self.rpc.to_wei(amount, 'ether')
         else:
-            value = int(Decimal(amount * 10 ** 6))
+            token_info = get_token_info(self.token_list[token_from], self.rpc)
+            value = int(Decimal(amount * 10 ** token_info['decimal']))
 
         withdraw_mode = 1
         swap_data = encode(
@@ -54,7 +55,10 @@ class SyncSwap(DEX):
 
         amount_out_min = int(Decimal(amount_out * (1-slippage)))
         func = self.router_contract.functions.swap(paths, amount_out_min, big_number)
-        gas_estimate = func.estimate_gas({'from': account.address})
+        try:
+            gas_estimate = func.estimate_gas({'from': account.address})
+        except:
+            gas_estimate = 800000
 
         if token_from == 'eth':
             tx = func.build_transaction(
@@ -82,6 +86,7 @@ class SyncSwap(DEX):
         else:
             p2 = '00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000'
         tx['data'] = p1 + p2
+        print(tx['data'])
         success = execute_tx(tx, account, self.rpc)
 
     def construct_liquidity_tx_data(self, acc, token_1, token_2, amount_1, amount_2):

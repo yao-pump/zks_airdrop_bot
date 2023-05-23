@@ -13,6 +13,8 @@ from nft.mint_square import MintSquare
 from nft.utils import get_random_image
 from bridge.orbiter import bridge as orbiter_bridge
 from bridge.bungee import bridge as bungee_bridge
+from bridge.layerswap import bridge as layerswap_bridge
+from others.zkdx import ZkDX
 
 neworks = ['eth_mainnet', 'eth_testnet', 'zks_era_mainnet', 'zks_era_testnet']
 def test_account():
@@ -40,10 +42,10 @@ def test_pool():
 
 def test_swap():
     db = connect_mongodb()
-    acc_info = get_account(db, 3)
+    acc_info = get_account(db, 1)
     acc = Account(acc_info)
-    syncswap = SyncSwap(network='testnet')
-    syncswap.swap(acc, 'eth', 'usdc', 0.01, slippage=0.05)
+    syncswap = SyncSwap(network='mainnet')
+    syncswap.swap(acc, 'eth', 'zat', 0.03, slippage=0.02)
 
 
 def test_add_liquidity():
@@ -74,7 +76,7 @@ def test_approve():
 
 def test_mint_square():
     db = connect_mongodb()
-    acc_info = get_account(db, 0)
+    acc_info = get_account(db, 1)
     acc = Account(acc_info)
     print(acc.address)
 
@@ -96,25 +98,46 @@ def test_mint_square():
 def test_izumi():
     izumi_swap = IzumiSwap(network='mainnet')
     db = connect_mongodb()
-    acc_info = get_account(db, 0)
+    acc_info = get_account(db, 1)
     acc = Account(acc_info)
-    izi_amount = (acc.get_balance('usdc', 'zks_era', 'mainnet'))
+    # izi_amount = (acc.get_balance('usdc', 'zks_era', 'mainnet'))
     # print(acc.get_eth_balance('zks_era_mainnet'))
-    izumi_swap.swap(acc, 'usdc', 'eth', izi_amount)
+    izumi_swap.swap(acc, 'eth', 'cheems', 0.03)
 
 
 def test_orbiter():
     db = connect_mongodb()
-    acc_info = get_account(db, 3)
+    acc_info = get_account(db, -1)
     acc = Account(acc_info)
-    orbiter_bridge(acc, 0.005)
+    orbiter_bridge(acc, 0.109, source_network='arb', destination_network='zks_era', network_type='mainnet')
 
 
 def test_bungee():
     db = connect_mongodb()
     acc_info = get_account(db, 4)
     acc = Account(acc_info)
-    bungee_bridge(acc, 0.001, source_network='eth', network_type='mainnet')
+    bungee_bridge(acc, 0.01, source_network='zks_era', destination_network='arb', network_type='mainnet')
+
+
+def test_layerswap():
+    db = connect_mongodb()
+    acc_info = get_account(db, 4)
+    acc = Account(acc_info)
+    layerswap_bridge(acc, 0.01, source_network='zks_era', destination_network='arb', network_type='mainnet')
+
+
+def test_zkdx():
+    db = connect_mongodb()
+    acc_info = get_account(db, 1)
+    acc = Account(acc_info)
+    zkdx = ZkDX()
+    print(acc.get_balance('tudsc', 'zks_era', 'mainnet'))
+    zkdx.claim_tudsc(acc)
+    time.sleep(8.5)
+    zkdx.approve_tudsc(acc)
+    time.sleep(13)
+    zkdx.increase_position(acc, 30000, is_long=False)
+
 
 if __name__ == '__main__':
     # test_account()
@@ -127,7 +150,9 @@ if __name__ == '__main__':
     # acc_info = get_account(db, 4)
     # acc = Account(acc_info)
     # test_mint_square()
-    test_izumi()
-    # test_orbiter()
+    # test_izumi()
+    test_orbiter()
     # test_bungee()
+    # test_layerswap()
+    # test_zkdx()
 

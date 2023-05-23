@@ -77,7 +77,7 @@ class DEX:
             self.router_address, int(Decimal(amount * 10 ** 6)))
         gas_estimate = func.estimate_gas({'from': account.address})
         # get random gas
-        gas_estimate = int(gas_estimate*random.uniform(1, 1.2))
+        # gas_estimate = int(gas_estimate*random.uniform(1, 1.2))
 
         tx = func.build_transaction(
             {'chainId': self.chain_id,

@@ -12,15 +12,6 @@ def create_wallet():
     acct = eth_account.Account.from_key(private_key)
     print("Address:", acct.address)
     account = {'address': acct.address, 'private_key': private_key}
-    # password = getpass('Enter a password to protect your wallet: ')
-    # encrypted_key = w3.eth.account.encrypt(private_key, password)
-    # with open('config/wallet.json', 'r+') as f:
-    #     accounts_json = json.load(f)
-    #     # with open('config/wallet.json', 'w') as f:
-    #     accounts_json[acct.address] = private_key
-    #     f.seek(0)
-    #     json.dump(accounts_json, f)
-    # print('Wallet created and saved to wallet.json')
     return account
 
 
