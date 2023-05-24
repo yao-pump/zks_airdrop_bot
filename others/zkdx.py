@@ -37,7 +37,8 @@ class ZkDX(BaseAPP):
               'data': tx_data,
               'to': self.rpc.to_checksum_address(self.faucet_address)}
 
-        execute_tx(tx, account, self.rpc)
+        success = execute_tx(tx, account, self.rpc)
+        return success
 
     def approve_tudsc(self, account):
         token_contract = self.rpc.eth.contract(address=self.rpc.to_checksum_address(self.faucet_address),
@@ -108,5 +109,42 @@ class ZkDX(BaseAPP):
                  account.address)})
 
         print(path, index_token, amount_in, min_out, size_delta, is_long, price)
+        print(tx['data'])
+        execute_tx(tx, account, self.rpc)
+
+
+    def decrease_position(self, account, size_delta, symbol='eth', is_long=True):
+        if is_long:
+            path = [self.dx_coins[symbol], self.faucet_address]
+        else:
+            path = [self.dx_coins[symbol]]
+
+        index_token = self.dx_coins[symbol]
+        collateral_delta = 0
+        receiver = account.address
+        price, conf, expo = get_coin_price(symbol)
+        if is_long:
+            price = int(round((price-conf) * 10 ** expo * 0.997, 5) * 10 ** 5) * 10 ** 25
+        else:
+            price = int(round((price+conf) * 10 ** expo * 1.003, 5) * 10 ** 5) * 10 ** 25
+
+        min_out = 0
+        withdraw_eth = False
+        update_data = []
+        func = self.trade_contract.functions.decreasePosition(path, index_token, collateral_delta,
+                                                              size_delta, is_long, receiver,
+                                                              price, min_out, withdraw_eth, update_data)
+        gas_estimate = func.estimate_gas({'from': account.address})
+        # print(gas_estimate)
+        tx = func.build_transaction(
+            {'chainId': self.chain_id,
+             'gas': gas_estimate,
+             'gasPrice': self.rpc.eth.gas_price,
+             'from': account.address,
+             # 'value': value,
+             'nonce': self.rpc.eth.get_transaction_count(
+                 account.address)})
+
+        # print(path, index_token, amount_in, min_out, size_delta, is_long, price)
         print(tx['data'])
         execute_tx(tx, account, self.rpc)

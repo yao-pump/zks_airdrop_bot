@@ -41,8 +41,9 @@ def bridge(account, amount, source_network="arb", destination_network="zks_era",
 
         # if networks[source_network] == "Arbitrum One":
         transfer_network = source_network + '_' + network_type
-        account.transfer_eth(deposit_address, amount, network=transfer_network)
-        time.sleep(30)
+        success = account.transfer_eth(deposit_address, amount, network=transfer_network)
+        return success
+        # time.sleep(30)
     # browser.close()
 
 def send_swap_request(amount, destination_address, source_network="ARBITRUM_MAINNET", destination_network="ZKSYNCERA_MAINNET", ):

@@ -115,7 +115,6 @@ def execute_tx(tx, account, rpc):
     transaction_hash = rpc.eth.send_raw_transaction(signed_txn.rawTransaction)
     print(f"Transaction hash: {transaction_hash.hex()}")
 
-    success = None
     while True:
         transaction_receipt = rpc.eth.wait_for_transaction_receipt(transaction_hash)
         if transaction_receipt['status'] == 1:

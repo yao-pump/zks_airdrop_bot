@@ -7,7 +7,15 @@ class Account:
     def __init__(self, account_info) -> None:
         self.address = account_info['address']
         self.private_key = account_info['private_key']
-        self.transactions = account_info['transactions']
+        # self.transactions = account_info['transactions']
+        try:
+            self.zkdx_info = account_info['zkdx']
+        except:
+            self.zkdx_info = None
+        try:
+            self.coin_balance = account_info['other_balance']
+        except:
+            self.coin_balance = {}
 
     def get_eth_balance(self, network='eth_mainnet'):
         balance = rpcs[network].eth.get_balance(self.address)

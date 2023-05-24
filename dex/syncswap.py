@@ -19,6 +19,22 @@ class SyncSwap(DEX):
         pool_address = self.rpc.to_checksum_address(pool_address)
         return pool_address
 
+    def query_swap(self, token_from, token_to, amount, slippage=0.015):
+        pool_address = self.get_pool_address(token_from, token_to)
+        pool_address = self.rpc.to_checksum_address(pool_address)
+        pool_contract = self.rpc.eth.contract(address=pool_address, abi=self.pool_abi)
+        if token_from == 'eth':
+            value = self.rpc.to_wei(amount, 'ether')
+        else:
+            token_info = get_token_info(self.token_list[token_from], self.rpc)
+            value = int(Decimal(amount * 10 ** token_info['decimal']))
+        amount_out = pool_contract.functions.getAmountOut(self.rpc.to_checksum_address(self.token_list[token_from]),
+                                                          value, self.rpc.to_checksum_address(self.router_address)).call()
+
+        amount_out_min = int(Decimal(amount_out * (1-slippage)))
+        token_info_to = get_token_info(self.token_list[token_to], self.rpc)
+        amount_out_min = amount_out_min / 10 ** token_info_to['decimal']
+        return amount_out_min
 
     def swap_token(self, account, token_from, token_to, amount, slippage):
         pool_address = self.get_pool_address(token_from, token_to)
@@ -58,7 +74,7 @@ class SyncSwap(DEX):
         try:
             gas_estimate = func.estimate_gas({'from': account.address})
         except:
-            gas_estimate = 800000
+            gas_estimate = 1200000
 
         if token_from == 'eth':
             tx = func.build_transaction(
@@ -88,6 +104,7 @@ class SyncSwap(DEX):
         tx['data'] = p1 + p2
         print(tx['data'])
         success = execute_tx(tx, account, self.rpc)
+        return success
 
     def construct_liquidity_tx_data(self, acc, token_1, token_2, amount_1, amount_2):
         function_signature = '0x94ec6d78'

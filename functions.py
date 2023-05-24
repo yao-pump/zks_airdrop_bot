@@ -1,6 +1,5 @@
 import time
 from random import random
-
 from cfg import create_wallet
 from database import connect_mongodb, insert_new_account
 from bridge.zks_era import bridge as official_bridge
@@ -12,7 +11,7 @@ from dex.muteswap import MuteSwap
 from dex.izumiswap import IzumiSwap
 from nft.mint_square import MintSquare
 from nft.utils import get_random_image
-
+from others.zkdx import ZkDX
 
 def create_new_account():
     db = connect_mongodb()
@@ -24,22 +23,23 @@ def create_new_account():
 def bridge(account, network_type='mainnet'):
     balance_main = account.get_eth_balance('eth_{}'.format(network_type))
     if balance_main > 0.11:
-        official_bridge(account, balance_main, network_type=network_type)
-        return
+        success = official_bridge(account, balance_main, network_type=network_type)
+        return success
 
     balance_arb = account.get_eth_balance('arb_{}'.format(network_type))
     if balance_arb > 0:
         use_bridge = random.choice(['orbiter', 'layerswap', 'bungee'])
         if use_bridge == 'orbiter':
-            orbiter_bridge(account, balance_arb, network_type=network_type)
+            success = orbiter_bridge(account, balance_arb, network_type=network_type)
         elif use_bridge == 'layerswap':
-            layerswap_bridge(account, balance_arb, network_type=network_type)
+            success = layerswap_bridge(account, balance_arb, network_type=network_type)
         elif use_bridge == 'bungee':
-            bungee_bridge(account, balance_arb, network_type=network_type)
+            success = bungee_bridge(account, balance_arb, network_type=network_type)
+        return success
+    else:
+        return False
 
-
-def swap(account, token_from, token_to, amount, network_type='mainnet'):
-    use_swap = random.choice(['syncswap', 'muteswap', 'izumiswap'])
+def swap(use_swap, account, token_from, token_to, amount, network_type='mainnet'):
     if use_swap == 'syncswap':
         current_swap = SyncSwap(network=network_type)
     elif use_swap == 'muteswap':
@@ -47,8 +47,8 @@ def swap(account, token_from, token_to, amount, network_type='mainnet'):
     elif use_swap == 'izumiswap':
         current_swap = IzumiSwap(network=network_type)
 
-    current_swap.swap(account, token_from, token_to, amount)
-
+    success = current_swap.swap(account, token_from, token_to, amount)
+    return success
 
 def mint_nft(account, network_type='mainnet'):
     market = MintSquare(network=network_type)
@@ -66,7 +66,20 @@ def mint_nft(account, network_type='mainnet'):
 
 
 def open_position_zkdx(account, symbol='eth', amount=10000, leverage=2, is_long=True):
-    pass
+    zkdx = ZkDX()
+    success = zkdx.increase_position(account, amount, symbol, leverage, is_long)
+    return success
+
+def claim_zkdx_usdc(account):
+    zkdx = ZkDX()
+    success = zkdx.claim_tudsc(account)
+    return success
+
+
+def close_position_zkdx(account, symbol, size_delta, is_long):
+    zkdx = ZkDX()
+    success = zkdx.decrease_position(account, size_delta, symbol, is_long)
+    return success
 
 
 def add_liquidity(account, token_1, token_2, amount_1, amount_2):
@@ -76,3 +89,5 @@ def add_liquidity(account, token_1, token_2, amount_1, amount_2):
 def remove_liquidity(account, token_1, token_2):
     pass
 
+if __name__ == '__main__':
+    create_new_account()

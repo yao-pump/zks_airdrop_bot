@@ -56,25 +56,9 @@ def bridge(account, amount, source_network="arb", destination_network="zks_era",
                 'to': rpc.to_checksum_address(tx_target)}
 
         success = execute_tx(tx, account, rpc)
-            # Initiates approval transaction on user's frontend which user has to sign
-            # receipt = w3.eth.sendRawTransaction(approval_transaction_data)
-            # print('Approval Transaction Hash :', receipt.hex())
+        return success
 
-    # Initiates swap/bridge transaction on user's frontend which user has to sign
-    # receipt = w3.eth.sendRawTransaction(api_return_data)
-    # tx_hash = receipt.hex()
-    # print('Bridging Transaction : ', receipt.hex())
 
-    # Checks status of transaction every 20 secs
-    # while True:
-    #     status = get_bridge_status(tx_hash, chains[source_network+'_'+network_type],
-    #                                chains[destination_network+'_'+network_type])
-    #     print('SOURCE TX : {}\nDEST TX : {}'.format(status['result']['sourceTxStatus'], status
-    #     ['result']['destinationTxStatus']))
-    #
-    #     if status['result']['destinationTxStatus'] == "COMPLETED":
-    #         print('DEST TX HASH :', status['result']['destinationTransactionHash'])
-    #         break
 # Helper Functions
 
 def get_quote(from_chain_id, from_token_address, to_chain_id, to_token_address, from_amount, user_address, unique_routes_per_bridge, sort, single_tx_only):

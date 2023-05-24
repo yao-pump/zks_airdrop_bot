@@ -110,6 +110,8 @@ def update_account(client, account_address, field_name, field_value, database='w
     :param port: MongoDB server port (default: 27017)
     :return: UpdateResult instance
     """
+    if not client:
+        client = connect_mongodb()
 
     db = client[database]
     coll = db[collection]

@@ -38,4 +38,54 @@
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
-}]
+},
+{
+  "constant": false,
+  "inputs": [
+    {
+      "name": "_path",
+      "type": "address[]"
+    },
+    {
+      "name": "_indexToken",
+      "type": "address"
+    },
+    {
+      "name": "_collateralDelta",
+      "type": "uint256"
+    },
+    {
+      "name": "_sizeDelta",
+      "type": "uint256"
+    },
+    {
+      "name": "_isLong",
+      "type": "bool"
+    },
+    {
+      "name": "_receiver",
+      "type": "address"
+    },
+    {
+      "name": "_price",
+      "type": "uint256"
+    },
+    {
+      "name": "_minOut",
+      "type": "uint256"
+    },
+    {
+      "name": "_withdrawETH",
+      "type": "bool"
+    },
+    {
+      "name": "_updateData",
+      "type": "bytes[]"
+    }
+  ],
+  "name": "decreasePosition",
+  "outputs": [],
+  "stateMutability": "payable",
+  "type": "function"
+}
+]

@@ -42,10 +42,10 @@ def test_pool():
 
 def test_swap():
     db = connect_mongodb()
-    acc_info = get_account(db, 1)
+    acc_info = get_account(db, -1)
     acc = Account(acc_info)
     syncswap = SyncSwap(network='mainnet')
-    syncswap.swap(acc, 'eth', 'zat', 0.03, slippage=0.02)
+    syncswap.swap(acc, 'eth', 'cheems', 0.05, slippage=0.02)
 
 
 def test_add_liquidity():
@@ -128,21 +128,21 @@ def test_layerswap():
 
 def test_zkdx():
     db = connect_mongodb()
-    acc_info = get_account(db, 1)
+    acc_info = get_account(db, 2)
     acc = Account(acc_info)
     zkdx = ZkDX()
-    print(acc.get_balance('tudsc', 'zks_era', 'mainnet'))
-    zkdx.claim_tudsc(acc)
-    time.sleep(8.5)
-    zkdx.approve_tudsc(acc)
-    time.sleep(13)
-    zkdx.increase_position(acc, 30000, is_long=False)
-
+    # print(acc.get_balance('tudsc', 'zks_era', 'mainnet'))
+    # zkdx.claim_tudsc(acc)
+    # time.sleep(8.5)
+    # zkdx.approve_tudsc(acc)
+    # time.sleep(13)
+    # zkdx.increase_position(acc, 30000, is_long=False)
+    zkdx.decrease_position(acc, 99718066866267468165283840000000000)
 
 if __name__ == '__main__':
     # test_account()
     # test_approve()
-    # test_swap()
+    test_swap()
     # test_add_liquidity()
     # test_remove_liquidity()
     # test_pool()
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # acc = Account(acc_info)
     # test_mint_square()
     # test_izumi()
-    test_orbiter()
+    # test_orbiter()
     # test_bungee()
     # test_layerswap()
     # test_zkdx()

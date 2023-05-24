@@ -1,5 +1,5 @@
 from cfg import rpcs, chains
-from utils import get_gas_price
+from utils import get_gas_price, execute_tx
 import random
 
 
@@ -42,7 +42,7 @@ def bridge(account, amount, source_network="arb", destination_network="zks_era",
     bridge_address = random.choice(marker_address[network_type])
     if account.get_eth_balance(source_network) <= amount:
         print('insufficient balance')
-        return
+        return False
 
     nonce = rpcs[source_network].eth.get_transaction_count(account.address)
 
@@ -63,8 +63,11 @@ def bridge(account, amount, source_network="arb", destination_network="zks_era",
         'value': amount,
         'chainId': chains[source_network],
     }
-    signed_txn = rpcs[source_network].eth.account.sign_transaction(transaction, account.private_key)
-    transaction_hash = rpcs[source_network].eth.send_raw_transaction(signed_txn.rawTransaction)
-    print(f'Transaction sent! TX hash: {transaction_hash.hex()}')
+
+    success = execute_tx(transaction, account, rpcs[source_network])
+    # signed_txn = rpcs[source_network].eth.account.sign_transaction(transaction, account.private_key)
+    # transaction_hash = rpcs[source_network].eth.send_raw_transaction(signed_txn.rawTransaction)
+    # print(f'Transaction sent! TX hash: {transaction_hash.hex()}')
+    return success
 
 

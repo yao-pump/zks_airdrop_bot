@@ -40,4 +40,5 @@ def bridge(account, amount, network_type="test"):
 	    'maxPriorityFeePerGas': web3.to_wei('1.5', 'gwei'), 'value': transfer_value,
                    'nonce': web3.eth.get_transaction_count(account.address)})
     tx['data'] = tx['data'][:64*9+10-1] + '0'
-    execute_tx(tx, account, web3)
+    success = execute_tx(tx, account, web3)
+    return success
