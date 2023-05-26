@@ -98,11 +98,11 @@ class MuteSwap(DEX):
             print("estimated_gas failed: ", e)
 
         # Add a buffer to the estimated gas (e.g., 10%)
-        gas_limit = int(estimated_gas * 1.1)
+        # gas_limit = int(estimated_gas * 1.1)
 
         # Update the transaction object with the gas limit and gas price
         transaction_object.update({
-            'gas': gas_limit,
+            'gas': estimated_gas,
             'gasPrice': self.rpc.eth.gas_price,
             'nonce': self.rpc.eth.get_transaction_count(account.address),
         })
@@ -111,6 +111,7 @@ class MuteSwap(DEX):
         tx = swap_function.build_transaction(transaction_object)
 
         success = execute_tx(tx, account, self.rpc)
+        return success
 
     def add_liquidity(self, account, token_1, token_2, amount_1, amount_2):
 

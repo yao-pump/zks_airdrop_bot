@@ -3,7 +3,7 @@ import time
 from web3 import Web3, HTTPProvider
 
 from cfg import providers
-from database import connect_mongodb, get_random_account, get_account
+from database import connect_mongodb, get_random_account, get_account, get_test_account
 from account import Account
 from dex.izumiswap import IzumiSwap
 from dex.syncswap import SyncSwap
@@ -15,6 +15,8 @@ from bridge.orbiter import bridge as orbiter_bridge
 from bridge.bungee import bridge as bungee_bridge
 from bridge.layerswap import bridge as layerswap_bridge
 from others.zkdx import ZkDX
+from others.eraland import EraLand
+from worker import Worker
 
 neworks = ['eth_mainnet', 'eth_testnet', 'zks_era_mainnet', 'zks_era_testnet']
 def test_account():
@@ -45,7 +47,7 @@ def test_swap():
     acc_info = get_account(db, -1)
     acc = Account(acc_info)
     syncswap = SyncSwap(network='mainnet')
-    syncswap.swap(acc, 'eth', 'cheems', 0.05, slippage=0.02)
+    syncswap.swap(acc, 'eth', 'cheems', 0.035, slippage=0.02)
 
 
 def test_add_liquidity():
@@ -136,13 +138,39 @@ def test_zkdx():
     # time.sleep(8.5)
     # zkdx.approve_tudsc(acc)
     # time.sleep(13)
-    # zkdx.increase_position(acc, 30000, is_long=False)
-    zkdx.decrease_position(acc, 99718066866267468165283840000000000)
+    zkdx.increase_position(acc, 50000, symbol='eth', is_long=False)
+    # zkdx.decrease_position(acc, 99718066866267468165283840000000000)
+
+
+def test_worker():
+    db = connect_mongodb()
+    # acc_info = get_test_account(db)
+    acc_info = get_account(db, 1)
+    acc = Account(acc_info)
+    worker = Worker(acc)
+    # worker.run()
+    # worker.run_mint()
+    # worker.run_zkdx()
+    worker.run_swap()
+
+
+def test_eraland():
+    db = connect_mongodb()
+    # acc_info = get_test_account(db)
+    acc_info = get_account(db, 1)
+    acc = Account(acc_info)
+    eraland = EraLand()
+    # eth_balance = acc.get_eth_balance()
+    # print()
+    # print(eraland.supply(acc, 'eth', 0.025))
+    print(eraland.check_supply(acc, 'eth'))
+
 
 if __name__ == '__main__':
+    # test_worker()
     # test_account()
     # test_approve()
-    test_swap()
+    # test_swap()
     # test_add_liquidity()
     # test_remove_liquidity()
     # test_pool()
@@ -155,4 +183,5 @@ if __name__ == '__main__':
     # test_bungee()
     # test_layerswap()
     # test_zkdx()
+    test_eraland()
 

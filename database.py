@@ -75,6 +75,15 @@ def get_account(client, index=0, database='web3', collection='accounts'):
     accounts = get_all_accounts(client, database, collection)
     return accounts[index]
 
+def get_test_account(client, database='web3', collection='accounts'):
+    filter = {'test account': 1}
+    db = client[database]
+    coll = db[collection]
+
+    document = list(coll.find(filter))
+    return document[0]
+
+
 def get_random_account(client, database='web3', collection='accounts'):
     """
     Get a random document from a MongoDB collection.
@@ -122,5 +131,7 @@ def update_account(client, account_address, field_name, field_value, database='w
 # Example usage:
 if __name__ == '__main__':
     client = connect_mongodb()
+    account = get_test_account(client)
+    print(account)
     # account = get_random_account(client)
     # update_account(client, account['address'], 'eth_main_balance', 0)

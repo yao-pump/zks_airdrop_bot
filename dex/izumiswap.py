@@ -27,7 +27,7 @@ class IzumiSwap(DEX):
         else:
             swap_amount = self.rpc.to_wei(amount, 'ether')
         output_amount, final_points = self.quoter_contract.functions.swapAmount(swap_amount, path).call()
-        print(output_amount, final_points)
+
         return output_amount, final_points
 
     def swap_token(self, account, token_from, token_to, amount, slippage=0.015):
@@ -76,10 +76,13 @@ class IzumiSwap(DEX):
                   account.address)})
         else:
             func = self.router_contract.functions.multicall(multicall)
-            # gas_estimate = func.estimate_gas({'from': account.address})
+            try:
+                gas_estimate = func.estimate_gas({'from': account.address})
+            except:
+                gas_estimate = 5000000
             tx = func.build_transaction(
             {'chainId': self.chain_id,
-                'gas': 5000000,
+                'gas': gas_estimate,
                 'gasPrice': self.rpc.eth.gas_price,
                 'from': account.address,
                 'value': value,
@@ -87,7 +90,7 @@ class IzumiSwap(DEX):
                   account.address)})
 
         success = execute_tx(tx, account, self.rpc)
-
+        return success
         # except:
         #     return False
 

@@ -97,11 +97,11 @@ class ZkDX(BaseAPP):
         # update_data = update_data[-1::]
         func = self.trade_contract.functions.increasePosition(path, index_token, amount_in, min_out,
                                                               size_delta, is_long, price, [])
-        # gas_estimate = func.estimate_gas({'from': account.address})
+        gas_estimate = func.estimate_gas({'from': account.address})
         # print(gas_estimate)
         tx = func.build_transaction(
             {'chainId': self.chain_id,
-             'gas': 8000000,
+             'gas': gas_estimate,
              'gasPrice': self.rpc.eth.gas_price,
              'from': account.address,
              # 'value': value,
@@ -110,14 +110,18 @@ class ZkDX(BaseAPP):
 
         print(path, index_token, amount_in, min_out, size_delta, is_long, price)
         print(tx['data'])
-        execute_tx(tx, account, self.rpc)
+        success = execute_tx(tx, account, self.rpc)
+        if success:
+            return True, size_delta, price * 10 ** (-30)
+        else:
+            return False, 0, 0
 
 
     def decrease_position(self, account, size_delta, symbol='eth', is_long=True):
         if is_long:
             path = [self.dx_coins[symbol], self.faucet_address]
         else:
-            path = [self.dx_coins[symbol]]
+            path = [self.faucet_address]
 
         index_token = self.dx_coins[symbol]
         collateral_delta = 0
@@ -147,4 +151,5 @@ class ZkDX(BaseAPP):
 
         # print(path, index_token, amount_in, min_out, size_delta, is_long, price)
         print(tx['data'])
-        execute_tx(tx, account, self.rpc)
+        success = execute_tx(tx, account, self.rpc)
+        return success

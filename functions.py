@@ -1,5 +1,5 @@
 import time
-from random import random
+import random
 from cfg import create_wallet
 from database import connect_mongodb, insert_new_account
 from bridge.zks_era import bridge as official_bridge
@@ -28,13 +28,14 @@ def bridge(account, network_type='mainnet'):
 
     balance_arb = account.get_eth_balance('arb_{}'.format(network_type))
     if balance_arb > 0:
-        use_bridge = random.choice(['orbiter', 'layerswap', 'bungee'])
+        # use_bridge = random.choice(['orbiter', 'layerswap', 'bungee'])
+        use_bridge = 'orbiter'
         if use_bridge == 'orbiter':
-            success = orbiter_bridge(account, balance_arb, network_type=network_type)
+            success = orbiter_bridge(account, float(balance_arb) * 0.95, network_type=network_type)
         elif use_bridge == 'layerswap':
-            success = layerswap_bridge(account, balance_arb, network_type=network_type)
+            success = layerswap_bridge(account, float(balance_arb) * 0.95, network_type=network_type)
         elif use_bridge == 'bungee':
-            success = bungee_bridge(account, balance_arb, network_type=network_type)
+            success = bungee_bridge(account, float(balance_arb) * 0.95, network_type=network_type)
         return success
     else:
         return False
@@ -62,13 +63,16 @@ def mint_nft(account, network_type='mainnet'):
                       "link": upload_info}
         nft_info = market.get_nft_hash(image_info)
         if nft_info:
-            market.mint_nft(nft_info, account)
+            success = market.mint_nft(nft_info, account)
+            return success
+
+    return False
 
 
 def open_position_zkdx(account, symbol='eth', amount=10000, leverage=2, is_long=True):
     zkdx = ZkDX()
-    success = zkdx.increase_position(account, amount, symbol, leverage, is_long)
-    return success
+    success, size_delta, open_price = zkdx.increase_position(account, amount, symbol, leverage, is_long)
+    return success, size_delta, open_price
 
 def claim_zkdx_usdc(account):
     zkdx = ZkDX()

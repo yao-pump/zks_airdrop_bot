@@ -65,7 +65,7 @@ class MintSquare(NFTMarketplace):
                  account.address)})
 
         success = execute_tx(tx, account, self.rpc)
-
+        return success
 
 
 

@@ -38,6 +38,7 @@ identify_code = {
 }
 
 def bridge(account, amount, source_network="arb", destination_network="zks_era", network_type='testnet'):
+    amount = round(amount, 3)
     source_network = source_network + '_' + network_type
     bridge_address = random.choice(marker_address[network_type])
     if account.get_eth_balance(source_network) <= amount:

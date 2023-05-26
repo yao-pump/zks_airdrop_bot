@@ -4,7 +4,7 @@ from cfg import get_dex_info, zks_token_addresses, providers, chains, token_abi
 import json
 from web3 import Web3, HTTPProvider
 
-from utils import execute_tx
+from utils import execute_tx, get_token_info
 import random
 
 
@@ -39,16 +39,18 @@ class DEX:
     def swap(self, account, token_from, token_to, amount, slippage=0.015):
         # approve token
         if token_from != 'eth':
-            value = int(Decimal(amount * 10 ** 6))
+            token_info = get_token_info(self.token_list[token_from], self.rpc)
+            value = int(Decimal(amount * 10 ** token_info['decimal']))
             approved_amount = self.check_approval(
                 account, token_from, self.router_address)
             if approved_amount < value:
-                tx_status = self.approve_token(account, token_from, amount)
+                tx_status = self.approve_token(account, token_from, value)
                 if tx_status != 1:
                     print('Approve token failed. Stop swap.')
                     return
 
-        self.swap_token(account, token_from, token_to, amount, slippage)
+        success = self.swap_token(account, token_from, token_to, amount, slippage)
+        return success
 
     def swap_token(self, account, token_from, token_to, amount, slippage):
         pass
@@ -74,7 +76,7 @@ class DEX:
             token_contract = self.rpc.eth.contract(address=self.rpc.to_checksum_address(token),
                                                    abi=token_abi)
         func = token_contract.functions.approve(
-            self.router_address, int(Decimal(amount * 10 ** 6)))
+            self.router_address, amount)
         gas_estimate = func.estimate_gas({'from': account.address})
         # get random gas
         # gas_estimate = int(gas_estimate*random.uniform(1, 1.2))

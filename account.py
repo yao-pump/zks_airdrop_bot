@@ -16,12 +16,16 @@ class Account:
             self.coin_balance = account_info['other_balance']
         except:
             self.coin_balance = {}
+        try:
+            self.eraland_info = account_info['eraland']
+        except:
+            self.eraland_info = {'eth': 0, 'usdc': 0}
 
-    def get_eth_balance(self, network='eth_mainnet'):
+    def get_eth_balance(self, network='zks_era_mainnet'):
         balance = rpcs[network].eth.get_balance(self.address)
         eth_balance = rpcs[network].from_wei(balance, "ether")
         print('Balance for {} on {}: {} ETH'.format(self.address, network, eth_balance))
-        return eth_balance
+        return float(eth_balance)
 
 
     def get_lp_balance(self, pool_address, network):
@@ -50,7 +54,7 @@ class Account:
         balance = contract.functions.balanceOf(self.address).call()
 
         token_info = get_token_info(contract_address, rpcs[network])
-        balance = Decimal(balance) / Decimal(10 ** token_info['decimal'])
+        balance = float(Decimal(balance) / Decimal(10 ** token_info['decimal']))
         return balance
 
 
