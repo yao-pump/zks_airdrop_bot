@@ -16,6 +16,7 @@ from bridge.bungee import bridge as bungee_bridge
 from bridge.layerswap import bridge as layerswap_bridge
 from others.zkdx import ZkDX
 from others.eraland import EraLand
+from others.zns import ZNS
 from worker import Worker
 
 neworks = ['eth_mainnet', 'eth_testnet', 'zks_era_mainnet', 'zks_era_testnet']
@@ -148,10 +149,10 @@ def test_worker():
     acc_info = get_account(db, 1)
     acc = Account(acc_info)
     worker = Worker(acc)
-    # worker.run()
+    worker.run()
     # worker.run_mint()
     # worker.run_zkdx()
-    worker.run_swap()
+    # worker.run_swap()
 
 
 def test_eraland():
@@ -166,8 +167,21 @@ def test_eraland():
     print(eraland.check_supply(acc, 'eth'))
 
 
+def test_zns():
+    db = connect_mongodb()
+    # acc_info = get_test_account(db)
+    acc_info = get_account(db, 0)
+    acc = Account(acc_info)
+    zns = ZNS()
+    # print(zns.check_available("tori"))
+    print(zns.register_domain(acc))
+    # domains = zns.get_owned_domains(acc)
+    # zns.set_primary_domain(acc, domains[0])
+    # print(zns.get_primary_domain(acc))
+
 if __name__ == '__main__':
-    # test_worker()
+    # test_zns()
+    test_worker()
     # test_account()
     # test_approve()
     # test_swap()
@@ -183,5 +197,5 @@ if __name__ == '__main__':
     # test_bungee()
     # test_layerswap()
     # test_zkdx()
-    test_eraland()
+    # test_eraland()
 

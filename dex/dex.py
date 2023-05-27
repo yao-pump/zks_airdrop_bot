@@ -45,7 +45,7 @@ class DEX:
                 account, token_from, self.router_address)
             if approved_amount < value:
                 tx_status = self.approve_token(account, token_from, value)
-                if tx_status != 1:
+                if tx_status[0] != 1:
                     print('Approve token failed. Stop swap.')
                     return
 

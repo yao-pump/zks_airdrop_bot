@@ -7,7 +7,10 @@ class Account:
     def __init__(self, account_info) -> None:
         self.address = account_info['address']
         self.private_key = account_info['private_key']
-        # self.transactions = account_info['transactions']
+        try:
+            self.transactions = account_info['transactions']
+        except:
+            self.transactions = []
         try:
             self.zkdx_info = account_info['zkdx']
         except:

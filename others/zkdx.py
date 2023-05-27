@@ -111,10 +111,10 @@ class ZkDX(BaseAPP):
         print(path, index_token, amount_in, min_out, size_delta, is_long, price)
         print(tx['data'])
         success = execute_tx(tx, account, self.rpc)
-        if success:
-            return True, size_delta, price * 10 ** (-30)
+        if success[0]:
+            return success, size_delta, price * 10 ** (-30)
         else:
-            return False, 0, 0
+            return success, 0, 0
 
 
     def decrease_position(self, account, size_delta, symbol='eth', is_long=True):
